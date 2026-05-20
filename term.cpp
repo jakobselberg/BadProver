@@ -13,7 +13,7 @@ struct Variable
 
 struct FunctionApplication;
 
-using Term = std::variant<Variable, std::unique_ptr<FunctionApplication>>;
+using Term = std::variant<Variable, std::shared_ptr<const FunctionApplication>>;
 
 struct FunctionSymbol
 {
