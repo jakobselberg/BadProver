@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <map>
 
 struct Variable
 {
@@ -31,7 +32,7 @@ std::set<Variable> FreeVariables(const Term &t)
 {
     if (auto v = std::get_if<Variable>(&t))
         return {*v};
-    const auto &f = *std::get<std::unique_ptr<FunctionApplication>>(t);
+    const auto &f = *std::get<std::shared_ptr<const FunctionApplication>>(t);
     std::set<Variable> result;
     for (const auto &arg : f.arguments)
     {
@@ -39,4 +40,10 @@ std::set<Variable> FreeVariables(const Term &t)
         result.merge(sub);
     }
     return result;
+};
+
+using Substitution = std::map<Variable, Term>;
+
+Term substitute(const Substitution &substitution, const Term &t)
+{
 }
