@@ -29,4 +29,14 @@ struct FunctionApplication
 
 std::set<Variable> FreeVariables(const Term &t)
 {
+    if (auto v = std::get_if<Variable>(&t))
+        return {*v};
+    const auto &f = *std::get<std::unique_ptr<FunctionApplication>>(t);
+    std::set<Variable> result;
+    for (const auto &arg : f.arguments)
+    {
+        auto sub = FreeVariables(arg);
+        result.merge(sub);
+    }
+    return result;
 }
