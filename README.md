@@ -1,3 +1,4 @@
 # BadProver
 
-cpp superposition prover
+superposition prover
+requires c++ version 20+
