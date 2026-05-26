@@ -1,0 +1,6 @@
+---
+BasedOnStyle: Microsoft
+ColumnLimit: '100'
+InsertNewlineAtEOF: true
+
+...
