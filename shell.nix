@@ -17,6 +17,9 @@ pkgs.mkShell.override {
     # build system
     cmake
     ninja
+
+    # testing
+    pkgs.doctest
   ];
 
   shellHook = ''
