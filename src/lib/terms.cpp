@@ -44,5 +44,11 @@ Term applySubstitution(const Substitution &substitution, const Term &t)
 
 Substitution composeSubstitutions(const Substitution &first, const Substitution &second)
 {
-    return first;
+    Substitution result = second;
+    for (const auto &[x, t] : first)
+    {
+        Term t2 = applySubstitution(second, t);
+        result[x] = std::move(t2);
+    }
+    return result;
 };
