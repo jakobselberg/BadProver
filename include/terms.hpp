@@ -27,7 +27,11 @@ struct FunctionApplication
     std::vector<Term> arguments;
 };
 
-using Substitution = std::map<Variable, Term>;
+Term makeFunctionApplication(FunctionSymbol symbol, std::vector<Term> arguments);
 
-std::set<Variable> FreeVariables(const Term &t);
-Term makeApp(FunctionSymbol symbol, std::vector<Term> arguments);
+using Substitution = std::map<Variable, Term>;
+Term applySubstitution(const Substitution &substitution, const Term &t);
+
+std::set<Variable> GetFreeVariables(const Term &t);
+
+Substitution composeSubstitutions(const Substitution &first, const Substitution &second);
