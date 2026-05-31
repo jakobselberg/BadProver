@@ -13,9 +13,9 @@ TEST_CASE("FreeVariables finds variables")
     Term tx = x;
     Term ty = y;
 
-    Term app = makeApp(f, {tx, ty});
+    Term app = makeFunctionApplication(f, {tx, ty});
 
-    auto fv = FreeVariables(app);
+    auto fv = GetFreeVariables(app);
 
     CHECK(fv.size() == 2);
     CHECK(fv.contains(x));
