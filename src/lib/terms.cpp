@@ -48,7 +48,11 @@ Substitution composeSubstitutions(const Substitution &first, const Substitution 
     for (const auto &[x, t] : first)
     {
         Term t2 = applySubstitution(second, t);
-        result[x] = std::move(t2);
+        // drop trivial identity bindings
+        if (auto *v = std::get_if<Variable>(&t2); v && *v == x)
+            result.erase(x);
+        else
+            result[x] = std::move(t2);
     }
     return result;
 };
