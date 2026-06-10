@@ -13,6 +13,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(atp_lib
     src/lib/terms.cpp
     src/lib/formulas.cpp
+    src/lib/unification.cpp
 )
 target_include_directories(atp_lib PUBLIC
     include
