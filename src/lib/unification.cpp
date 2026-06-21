@@ -7,7 +7,7 @@ bool occursIn(const Variable &x, const Term &t)
 {
     if (auto *v = std::get_if<Variable>(&t))
         return *v == x;
-    const auto &f = *std::get<std::shared_ptr<const FunctionApplication>>(t);
+    const auto &f = *std::get<FunctionApplicationRef>(t);
     for (const auto &arg : f.arguments)
         if (occursIn(x, arg))
             return true;
@@ -51,8 +51,8 @@ std::optional<Substitution> mgu(std::vector<std::pair<Term, Term>> equations)
             continue;
         }
 
-        const auto &f = *std::get<std::shared_ptr<const FunctionApplication>>(s);
-        const auto &g = *std::get<std::shared_ptr<const FunctionApplication>>(t);
+        const auto &f = *std::get<FunctionApplicationRef>(s);
+        const auto &g = *std::get<FunctionApplicationRef>(t);
         if (f.symbol.name != g.symbol.name || f.symbol.arity != g.symbol.arity)
             return std::nullopt; // clash
 
