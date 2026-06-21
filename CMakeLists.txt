@@ -14,6 +14,7 @@ add_library(atp_lib
     src/lib/terms.cpp
     src/lib/unification.cpp
     src/lib/cnf.cpp
+    src/lib/tptp_parser.cpp
 )
 target_include_directories(atp_lib PUBLIC
     include
@@ -45,6 +46,7 @@ endfunction()
 
 add_doctest(terms_test)
 add_doctest(differenttest)
+add_doctest(tptp_parser_test)
 
 
 # set compiler options to enable more warnings and errors
