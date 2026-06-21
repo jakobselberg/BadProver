@@ -28,7 +28,7 @@ std::set<Variable> FreeVariables(const Literal &lit)
 // Clauses
 Clause makeClause(int id, std::set<Literal> lits)
 {
-    Clause c(id);
+    Clause c{id, {}};
     c.literals = std::move(lits);
     return c;
 }
@@ -45,7 +45,7 @@ void removeLiteralFromClause(Clause &c, const Literal &lit)
 
 Clause applySubstitution(const Substitution &substitution, const Clause &c)
 {
-    Clause result(c.id);
+    Clause result{c.id, {}};
     for (const auto &lit : c.literals)
     {
         result.literals.insert(::applySubstitution(substitution, lit));
