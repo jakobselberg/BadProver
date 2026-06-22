@@ -2,6 +2,7 @@
 #include <compare>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <variant>
@@ -56,6 +57,12 @@ struct FunctionApplication
 Term makeFunctionApplication(FunctionSymbol symbol, std::vector<Term> arguments);
 
 using Substitution = std::map<Variable, Term>;
+using Position = std::vector<int>;
+
+std::optional<Term> getSubtermAt(const Term &t, const Position &pos);
+std::optional<Term> setSubtermAt(const Term &t, const Position &pos, const Term &replacement);
+std::vector<Position> allSubtermPositions(const Term &t);
+
 Term applySubstitution(const Substitution &substitution, const Term &t);
 
 std::set<Variable> GetFreeVariables(const Term &t);

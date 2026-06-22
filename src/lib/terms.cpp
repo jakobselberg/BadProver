@@ -75,4 +75,66 @@ Substitution composeSubstitutions(const Substitution &first, const Substitution 
             result[x] = std::move(t2);
     }
     return result;
-};
+}
+
+std::optional<Term> getSubtermAt(const Term &t, const Position &pos)
+{
+    if (pos.empty())
+        return t;
+
+    if (std::get_if<Variable>(&t))
+        return std::nullopt;
+
+    const auto &f = *std::get<FunctionApplicationRef>(t);
+    int idx = pos[0];
+    if (idx < 0 || idx >= static_cast<int>(f.arguments.size()))
+        return std::nullopt;
+
+    Position tail(pos.begin() + 1, pos.end());
+    return getSubtermAt(f.arguments[static_cast<std::size_t>(idx)], tail);
+}
+
+std::optional<Term> setSubtermAt(const Term &t, const Position &pos, const Term &replacement)
+{
+    if (pos.empty())
+        return replacement;
+
+    if (std::get_if<Variable>(&t))
+        return std::nullopt;
+
+    const auto &f = *std::get<FunctionApplicationRef>(t);
+    int idx = pos[0];
+    if (idx < 0 || idx >= static_cast<int>(f.arguments.size()))
+        return std::nullopt;
+
+    Position tail(pos.begin() + 1, pos.end());
+    auto subterm = setSubtermAt(f.arguments[static_cast<std::size_t>(idx)], tail, replacement);
+    if (!subterm)
+        return std::nullopt;
+
+    std::vector<Term> newArgs = f.arguments;
+    newArgs[static_cast<std::size_t>(idx)] = *subterm;
+    return makeFunctionApplication(f.symbol, std::move(newArgs));
+}
+
+static void allSubtermPositionsImpl(const Term &t, Position prefix, std::vector<Position> &acc)
+{
+    acc.push_back(prefix);
+    if (std::get_if<Variable>(&t))
+        return;
+
+    const auto &f = *std::get<FunctionApplicationRef>(t);
+    for (std::size_t i = 0; i < f.arguments.size(); ++i)
+    {
+        Position childPrefix = prefix;
+        childPrefix.push_back(static_cast<int>(i));
+        allSubtermPositionsImpl(f.arguments[i], std::move(childPrefix), acc);
+    }
+}
+
+std::vector<Position> allSubtermPositions(const Term &t)
+{
+    std::vector<Position> result;
+    allSubtermPositionsImpl(t, {}, result);
+    return result;
+}
