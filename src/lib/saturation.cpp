@@ -70,6 +70,10 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         generated.insert(generated.end(), equalityResolutionResult.begin(),
                          equalityResolutionResult.end());
 
+        auto equalityFactoringResult = equalityFactoring(given);
+        generated.insert(generated.end(), equalityFactoringResult.begin(),
+                         equalityFactoringResult.end());
+
         for (const auto &c : state.active)
         {
             auto s1 = superposition(given, c);
