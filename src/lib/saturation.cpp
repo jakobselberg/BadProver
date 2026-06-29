@@ -61,7 +61,8 @@ SaturationResult saturate(ProofState &state, int max_iteration)
 
         std::size_t idx = selectGivenIndex(state.passive);
         Clause given = state.passive[idx];
-        state.passive.erase(state.passive.begin() + static_cast<std::ptrdiff_t>(idx));
+        state.passive[idx] = state.passive.back();
+        state.passive.pop_back();
         state.active.push_back(given);
 
         std::vector<Clause> generated;
