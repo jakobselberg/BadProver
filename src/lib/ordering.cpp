@@ -79,6 +79,29 @@ Comparison kboCompare(const Term &s, const Term &t)
                                                                   : Comparison::Incomparable;
         return Comparison::Incomparable;
     }
+
+    const auto &fs = *std::get<FunctionApplicationRef>(s);
+    const auto &ft = *std::get<FunctionApplicationRef>(t);
+
+    const int prec = comparePrecedence(fs.symbol, ft.symbol);
+    if (prec > 0)
+        return sDominates ? Comparison::Greater : Comparison::Incomparable;
+    if (prec < 0)
+        return tDominates ? Comparison::Less : Comparison::Incomparable;
+
+    // same function symbol
+    for (std::size_t i = 0; i < fs.arguments.size(); i++)
+    {
+        const Comparison c = kboCompare(fs.arguments[i], ft.arguments[i]);
+        if (c == Comparison::Equal)
+            continue;
+        if (c == Comparison::Greater)
+            return sDominates ? Comparison::Greater : Comparison::Incomparable;
+        if (c == Comparison::Less)
+            return tDominates ? Comparison::Less : Comparison::Incomparable;
+        return Comparison::Incomparable;
+    }
+    return Comparison::Equal;
 };
 
 } // namespace
