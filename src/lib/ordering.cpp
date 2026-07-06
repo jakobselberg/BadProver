@@ -191,4 +191,16 @@ Comparison compareLiterals(const Literal &a, const Literal &b)
     return Comparison::Incomparable;
 }
 
+bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit)
+{
+    for (const auto &other : lits)
+    {
+        if (other == lit)
+            continue;
+        if (compareLiterals(other, lit) == Comparison::Greater)
+            return false;
+    }
+    return true;
+}
+
 } // namespace
