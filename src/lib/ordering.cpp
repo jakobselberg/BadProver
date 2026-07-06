@@ -28,4 +28,15 @@ void collectVariableCounts(const Term &t, std::map<Variable, int> &counts)
         collectVariableCounts(arg, counts);
 };
 
+Comparison kboCompare(const Term &s, const Term &t)
+{
+    std::map<Variable, int> sCounts;
+    std::map<Variable, int> tCounts;
+    collectVariableCounts(s, sCounts);
+    collectVariableCounts(t, tCounts);
+
+    const int ws = termWeight(s);
+    const int wt = termWeight(t);
+};
+
 } // namespace
