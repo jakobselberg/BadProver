@@ -1,4 +1,7 @@
 #include "ordering.hpp"
+#include <map>
+#include <variant>
+#include <vector>
 
 namespace
 {
@@ -12,4 +15,17 @@ int termWeight(const Term &t)
         w += termWeight(arg);
     return w;
 }
+
+void collectVariableCounts(const Term &t, std::map<Variable, int> &counts)
+{
+    if (const auto *v = std::get_if<Variable>(&t))
+    {
+        counts[*v] += 1;
+        return;
+    }
+    const auto &app = *std::get<FunctionApplicationRef>(t);
+    for (const auto &arg : app.arguments)
+        collectVariableCounts(arg, counts);
+};
+
 } // namespace
