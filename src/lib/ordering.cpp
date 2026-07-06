@@ -102,6 +102,11 @@ Comparison kboCompare(const Term &s, const Term &t)
         return Comparison::Incomparable;
     }
     return Comparison::Equal;
-};
+}
+
+bool kboGreater(const Term &s, const Term &t)
+{
+    return kboCompare(s, t) == Comparison::Greater;
+}
 
 } // namespace
