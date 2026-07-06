@@ -50,6 +50,13 @@ int comparePrecedence(const FunctionSymbol &f, const FunctionSymbol &g)
     return 0;
 }
 
+std::vector<Term> literalMultiset(const Literal &lit)
+{
+    if (lit.positive)
+        return {lit.left, lit.right};
+    return {lit.left, lit.left, lit.right, lit.right};
+}
+
 Comparison kboCompare(const Term &s, const Term &t)
 {
     std::map<Variable, int> sCounts;
@@ -107,6 +114,12 @@ Comparison kboCompare(const Term &s, const Term &t)
 bool kboGreater(const Term &s, const Term &t)
 {
     return kboCompare(s, t) == Comparison::Greater;
+}
+
+Comparison compareLiterals(const Literal &a, const Literal &b)
+{
+    std::vector<Term> m = literalMultiset(a);
+    std::vector<Term> n = literalMultiset(b);
 }
 
 } // namespace
