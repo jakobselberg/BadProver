@@ -26,7 +26,7 @@ void collectVariableCounts(const Term &t, std::map<Variable, int> &counts)
     const auto &app = *std::get<FunctionApplicationRef>(t);
     for (const auto &arg : app.arguments)
         collectVariableCounts(arg, counts);
-};
+}
 
 // does 'super' contains at least as many occurences of every variable as 'sub'?
 bool variablesDominate(const std::map<Variable, int> &super, const std::map<Variable, int> &sub)
@@ -56,7 +56,7 @@ std::vector<Term> literalMultiset(const Literal &lit)
         return {lit.left, lit.right};
     return {lit.left, lit.left, lit.right, lit.right};
 }
-
+} // namespace
 Comparison kboCompare(const Term &s, const Term &t)
 {
     std::map<Variable, int> sCounts;
@@ -97,7 +97,7 @@ Comparison kboCompare(const Term &s, const Term &t)
         return tDominates ? Comparison::Less : Comparison::Incomparable;
 
     // same function symbol
-    for (std::size_t i = 0; i < fs.arguments.size(); i++)
+    for (std::size_t i = 0; i < fs.arguments.size(); ++i)
     {
         const Comparison c = kboCompare(fs.arguments[i], ft.arguments[i]);
         if (c == Comparison::Equal)
@@ -202,5 +202,3 @@ bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit)
     }
     return true;
 }
-
-} // namespace
