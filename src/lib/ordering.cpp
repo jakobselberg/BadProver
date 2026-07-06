@@ -29,7 +29,7 @@ void collectVariableCounts(const Term &t, std::map<Variable, int> &counts)
 };
 
 // does 'super' contains at least as many occurences of every variable as 'sub'?
-bool variableDominates(const std::map<Variable, int> &super, const std::map<Variable, int> &sub)
+bool variablesDominate(const std::map<Variable, int> &super, const std::map<Variable, int> &sub)
 {
     for (const auto &[v, n] : sub)
     {
@@ -41,6 +41,15 @@ bool variableDominates(const std::map<Variable, int> &super, const std::map<Vari
     return true;
 }
 
+int comparePrecedence(const FunctionSymbol &f, const FunctionSymbol &g)
+{
+    if (f.arity != g.arity)
+        return f.arity < g.arity ? -1 : 1;
+    if (f.name != g.name)
+        return f.name < g.name ? -1 : 1;
+    return 0;
+}
+
 Comparison kboCompare(const Term &s, const Term &t)
 {
     std::map<Variable, int> sCounts;
@@ -49,9 +58,27 @@ Comparison kboCompare(const Term &s, const Term &t)
     collectVariableCounts(t, tCounts);
 
     const bool sDominates = variablesDominate(sCounts, tCounts);
+    const bool tDominates = variablesDominate(tCounts, sCounts);
 
     const int ws = termWeight(s);
     const int wt = termWeight(t);
+
+    if (ws > wt)
+        return sDominates ? Comparison::Greater : Comparison::Incomparable;
+    if (ws < wt)
+        return tDominates ? Comparison::Less : Comparison::Incomparable;
+
+    // equal weight
+
+    const bool sVar = std::holds_alternative<Variable>(s);
+    const bool tVar = std::holds_alternative<Variable>(t);
+    if (sVar || tVar)
+    {
+        if (sVar && tVar)
+            return std::get<Variable>(s) == std::get<Variable>(t) ? Comparison::Equal
+                                                                  : Comparison::Incomparable;
+        return Comparison::Incomparable;
+    }
 };
 
 } // namespace
