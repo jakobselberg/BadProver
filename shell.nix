@@ -18,6 +18,9 @@ pkgs.mkShell.override {
     cmake
     ninja
 
+    #commandline parsing
+    pkgs.cxxopts
+
     # testing
     pkgs.doctest
   ];

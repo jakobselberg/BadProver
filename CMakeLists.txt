@@ -19,6 +19,8 @@ add_library(atp_lib
     src/lib/ordering.cpp
     src/lib/saturation.cpp
     src/lib/util.cpp
+    src/lib/config.cpp
+    src/lib/client.cpp
 
 )
 target_include_directories(atp_lib PUBLIC

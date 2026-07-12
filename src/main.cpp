@@ -1,7 +1,5 @@
-#include <iostream>
-
-int main()
+#include "client.hpp"
+int main(int argc, char *argv[])
 {
-    std::cout << "Test nix, clang and cmake \n";
-    return 0;
+    return runClient(argc, argv);
 }

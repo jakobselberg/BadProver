@@ -1,0 +1,122 @@
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cxxopts.hpp>
+#include <exception>
+#include <future>
+#include <iostream>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+
+#include "client.hpp"
+#include "config.hpp"
+#include "tptp_parser.hpp"
+#include "util.hpp"
+int runClient(int argc, char *argv[])
+{
+    // STEP 0: grab timestamp at beginning of program
+    const auto beginning = std::chrono::steady_clock::now();
+    std::cout << "Test nix, clang and cmake \n";
+    // STEP 1: parse command line args
+    cxxopts::Options options("sat", "SAT Solver accepting DIMACS-CNF-formatted input and producing "
+                                    "DIMACS-CNF-formatted output.");
+
+    options.add_options()("h, help", "Print usage information");
+    options.add_options()("f, file", "Path to the input file", cxxopts::value<std::string>());
+    options.add_options()("t, timeout",
+                          "Set the maximum wall-clock time allowed for the solver to finish, in "
+                          "seconds. Setting 0 disables the timeout. Default: 0",
+                          cxxopts::value<unsigned long long>()->default_value("0"));
+    try
+    {
+        cxxopts::ParseResult result = options.parse(argc, argv);
+
+        if (result.count("help"))
+        {
+            std::printf("%s", options.help().c_str());
+            return EXIT_SUCCESS;
+        }
+
+        if (result.count("file"))
+        {
+            set_config_file_path(result["file"].as<std::string>());
+        }
+        else
+        {
+            // file is required!
+            std::printf("%s", options.help().c_str());
+            return EXIT_FAILURE;
+        }
+        set_config_timeout(result["timeout"].as<unsigned long long>());
+    }
+    catch (cxxopts::exceptions::exception e)
+    {
+        std::cerr << "Error parsing command line arguments: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Define a task which runs the solver and handles in- and output
+    std::packaged_task<int()> solver_task([] {
+        // STEP 2: load input file into a string
+        std::string content;
+
+        try
+        {
+
+            content = load_file_from_path(get_config_file_path());
+        }
+        catch (const std::runtime_error &e)
+        {
+
+            std::cerr << e.what() << std::endl;
+
+            return EXIT_FAILURE;
+        }
+        // STEP 3 + 4: parse input string into a formula and prove it
+
+        return 0;
+    });
+
+    // Now, start a worker thread for executing the actual Prover, and just wait in the main
+    // thread for the result with a timeout
+
+    // get a future / "ticket" to redeem the solver task result
+    std::future<int> solver_future = solver_task.get_future();
+
+    // start worker thread working on the solver task
+    std::thread solver_worker(std::move(solver_task));
+
+    if (get_config_timeout() == 0)
+    {
+        // if timeout is disabled, wait indefinitely until Prover is finished
+        solver_future.wait();
+        // redeem future to get return value
+        int result = solver_future.get();
+        // wait until the worker has properly terminated
+        solver_worker.join();
+        return result;
+    }
+    else
+    {
+        // else, wait at most until the deadline
+        const auto deadline = beginning + std::chrono::seconds(get_config_timeout());
+        if ((solver_future.wait_until(deadline) == std::future_status::ready))
+        {
+            // Prover finished in time: return the exit value of the worker thread
+            // redeem future to get return value
+            int result = solver_future.get();
+            // wait until the worker has properly terminated
+            solver_worker.join();
+            return result;
+        }
+        else
+        {
+            // timeout was reached: abandon worker thread and exit with an error
+            solver_worker.detach();
+            std::cout << "c UNKNOWN" << std::endl;
+
+            return EXIT_UNKNOWN;
+        }
+    }
+}

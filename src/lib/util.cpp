@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -76,4 +77,18 @@ std::string printClause(const Clause &clause)
 void printC(const Clause &clause)
 {
     std::cout << printClause(clause) << '\n';
+}
+
+std::string load_file_from_path(const std::string &path)
+{
+    std::ifstream input_file_stream(path);
+    if (input_file_stream.fail())
+    {
+        throw std::runtime_error("Could not open file: " + path);
+    }
+
+    std::ostringstream content_stream;
+    content_stream << input_file_stream.rdbuf();
+    input_file_stream.close();
+    return content_stream.str();
 }
