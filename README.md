@@ -1,3 +1,8 @@
+# To DO
+
+Term Types Predicate Vs Variable Type
+maintaine unique Clause Id when adding clauses
+
 # BadProver
 
 superposition prover
