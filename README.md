@@ -1,7 +1,10 @@
 # To DO
 
-Term Types Predicate Vs Variable Type
-maintaine unique Clause Id when adding clauses
++ Term Types Predicate Vs Variable Type
++ maintaine unique Clause Id when adding clauses
++ hookup main to prover logic
++ find larger set of rellevant Problem files
++ modify parser to load axioms from additional files
 
 # BadProver
 
