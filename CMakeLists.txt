@@ -16,6 +16,9 @@ add_library(atp_lib
     src/lib/cnf.cpp
     src/lib/tptp_parser.cpp
     src/lib/inference.cpp
+    src/lib/ordering.cpp
+    src/lib/saturation.cpp
+
 )
 target_include_directories(atp_lib PUBLIC
     include
