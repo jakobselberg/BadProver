@@ -58,22 +58,14 @@ int runClient(int argc, char *argv[])
 
     // Define a task which runs the solver and handles in- and output
     std::packaged_task<int()> solver_task([] {
-        // STEP 2: load input file into a string
-        std::string content;
-
-        try
+        // STEP 2: parse input file into a formula
+        std::vector<Clause> formula = parseTPTPCNFFromFile(get_config_file_path());
+        /*for (const Clause &clause : formula)
         {
+            printC(clause);
+        }*/
 
-            content = load_file_from_path(get_config_file_path());
-        }
-        catch (const std::runtime_error &e)
-        {
-
-            std::cerr << e.what() << std::endl;
-
-            return EXIT_FAILURE;
-        }
-        // STEP 3 + 4: parse input string into a formula and prove it
+        // STEP 3 prove it
 
         return 0;
     });
