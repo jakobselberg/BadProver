@@ -18,6 +18,7 @@ add_library(atp_lib
     src/lib/inference.cpp
     src/lib/ordering.cpp
     src/lib/saturation.cpp
+    src/lib/util.cpp
 
 )
 target_include_directories(atp_lib PUBLIC

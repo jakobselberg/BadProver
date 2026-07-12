@@ -11,6 +11,7 @@
 #include "inference.hpp"
 #include "terms.hpp"
 #include "tptp_parser.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -62,9 +63,15 @@ TEST_CASE("term subterm positions")
 TEST_CASE("superposition on a single equality")
 {
     Clause D{1, std::set<Literal>{eq(F("f", {Const("a")}), Const("b"), true)}};
-    Clause clauseC{2, std::set<Literal>{pred("p", {F("f", {Const("a")})}, true)}};
+    Clause C{2, std::set<Literal>{pred("p", {F("f", {Const("a")})}, true)}};
 
-    auto results = superposition(D, clauseC);
+    auto results = superposition(D, C);
+    /*printC(C);
+    printC(D);
+    for (const auto &cl : results)
+    {
+        printC(cl);
+    }*/
     REQUIRE(results.size() == 1);
     Clause expected{-1, std::set<Literal>{pred("p", {Const("b")}, true)}};
     CHECK(results[0].literals == expected.literals);
@@ -74,21 +81,29 @@ TEST_CASE("equality resolution")
 {
     Clause clauseC{1, std::set<Literal>{eq(V("X"), Const("a"), false), pred("p", {V("X")}, true)}};
     auto results = equalityResolution(clauseC);
+    /*printC(clauseC);
+    for (const auto &cl : results)
+    {
+        printC(cl);
+    }*/
     REQUIRE(results.size() == 1);
     Clause expected{-1, std::set<Literal>{pred("p", {Const("a")}, true)}};
     CHECK(results[0].literals == expected.literals);
 }
 
-/* incomplete
+// of limited usefullnes witjout ordering
 TEST_CASE("equality factoring")
 {
     Clause clauseC{1,
                    std::set<Literal>{eq(V("X"), Const("a"), true), eq(V("X"), Const("b"), true)}};
+    // printC(clauseC);
     auto results = equalityFactoring(clauseC);
-
-    REQUIRE(results.size() == 1);
+    /*for (const auto &cl : results)
+    {
+        printC(cl);
+    }*/
+    REQUIRE(results.size() >= 1);
     CHECK(std::any_of(results.begin(), results.end(), [&](const Clause &cl) {
         return cl.literals.contains(eq(Const("a"), Const("b"), false));
     }));
 }
-*/

@@ -1,7 +1,6 @@
 #include "inference.hpp"
-#include "tptp_parser.hpp"
 #include "unification.hpp"
-#include <algorithm>
+#include "util.hpp"
 #include <array>
 
 namespace
