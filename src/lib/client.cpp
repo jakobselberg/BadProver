@@ -67,6 +67,8 @@ int runClient(int argc, char *argv[])
         }*/
         ProofState proof;
         proof.passive = std::move(formula);
+
+        proof.next_id = static_cast<int>(proof.passive.size());
         // STEP 3 prove it
         SaturationResult result = saturate(proof);
 
