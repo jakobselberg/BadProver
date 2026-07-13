@@ -17,6 +17,8 @@ static bool isTautology(const Clause &c)
     {
         if (c.literals.contains(invertLiteral(lit)))
             return true;
+        if (lit.positive && lit.left == lit.right)
+            return true;
     }
     return false;
 }
