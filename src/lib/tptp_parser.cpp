@@ -19,8 +19,6 @@ const Term &tptpTrueImpl()
 class Parser
 {
 
-    std::string baseDir_;
-
   public:
     explicit Parser(std::string_view src) : src_(src)
     {
@@ -67,6 +65,8 @@ class Parser
   private:
     std::string_view src_;
     std::size_t pos_ = 0;
+
+    std::string baseDir_;
 
     [[noreturn]] void error(const std::string &msg) const
     {
