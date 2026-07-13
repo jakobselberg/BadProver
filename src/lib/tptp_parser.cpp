@@ -38,7 +38,7 @@ class Parser
         int nextId = 0;
         while (!atEnd())
         {
-            clauses.push_back(parseAnnotatedFormula(nextId++));
+            clauses.push_back(parseCNFBody(nextId++));
             skipWhitespaceAndComments();
         }
         return clauses;
@@ -207,20 +207,8 @@ class Parser
     // -- TPTP grammar -----------------------------------------------------
 
     // annotated_formula := language '(' name ',' role ',' body ')' '.'
-    Clause parseAnnotatedFormula(int id)
+    Clause parseCNFBody(int id)
     {
-        skipWhitespaceAndComments();
-        // language must be 'cnf'
-        std::string language = parseLowerWord("a TPTP language keyword (expected 'cnf')");
-        if (language != "cnf")
-        {
-            if (language == "fof" || language == "tff" || language == "thf")
-                error("unsupported TPTP language '" + language + "' (only 'cnf' is supported)");
-            if (language == "include")
-                error("'include' directives are not supported");
-            error("expected 'cnf', got '" + language + "'");
-        }
-
         skipWhitespaceAndComments();
         expect('(', "after 'cnf'");
 
@@ -256,6 +244,49 @@ class Parser
 
         Clause c{id, std::move(lits)};
         return c;
+    }
+
+    std::vector<Clause> parseIncludeDirective()
+    {
+        skipWhitespaceAndComments();
+        expect('(', "after 'include'");
+        std::string path = parseSingleQuotedString();
+
+        skipWhitespaceAndComments();
+        if (match(','))
+        {
+            skipWhitespaceAndComments();
+            expect('[', "include name list");
+            int depth = 1;
+            while (!atEnd() && depth > 0)
+            {
+                char c = advance();
+                if (c == '[')
+                    ++depth;
+                else if (c == ']')
+                    --depth;
+            }
+        }
+
+        skipWhitespaceAndComments();
+        expect(')', "to close include(...)");
+        skipWhitespaceAndComments();
+        expect('.', "to terminate include directive");
+
+        if (baseDir_.empty())
+            error("cannot resolve include directive without a file path context");
+
+        std::string fullPath = baseDir_ + "/" + path;
+        std::ifstream in(fullPath);
+        if (!in)
+            error("could not open included file: " + fullPath);
+        std::ostringstream oss;
+        oss << in.rdbuf();
+        std::string contents = oss.str();
+
+        std::string includedDir = fullPath.substr(0, fullPath.rfind('/'));
+        Parser sub(contents, includedDir);
+        return sub.parseFile();
     }
 
     // clause_body := '(' disjunction ')' | disjunction
