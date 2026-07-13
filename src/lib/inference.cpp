@@ -130,6 +130,10 @@ std::vector<Clause> equalityResolution(const Clause &C)
         if (!sigma)
             continue;
 
+        Clause sigmaC = applySubstitution(*sigma, C);
+        if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, lit)))
+            continue;
+
         Clause resolvent{-1, C.literals};
         resolvent.literals.erase(lit);
         resolvent = applySubstitution(*sigma, resolvent);
