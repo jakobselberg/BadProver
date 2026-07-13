@@ -38,7 +38,27 @@ class Parser
         int nextId = 0;
         while (!atEnd())
         {
-            clauses.push_back(parseCNFBody(nextId++));
+            std::string keyword = parseLowerWord("a TPTP keyword");
+            if (keyword == "cnf")
+            {
+                clauses.push_back(parseCNFBody(nextId++));
+            }
+            else if (keyword == "include")
+            {
+                for (auto &c : parseIncludeDirective())
+                {
+                    c.id = nextId++;
+                    clauses.push_back(std::move(c));
+                }
+            }
+            else if (keyword == "fof" || keyword == "tff" || keyword == "thf")
+            {
+                error("unsupported TPTP language '" + keyword + "' (only 'cnf' is supported)");
+            }
+            else
+            {
+                error("expected 'cnf' or 'include', got '" + keyword + "'");
+            }
             skipWhitespaceAndComments();
         }
         return clauses;
