@@ -1,4 +1,5 @@
 #include "inference.hpp"
+#include "ordering.hpp"
 #include "unification.hpp"
 #include "util.hpp"
 #include <array>
@@ -39,6 +40,19 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
 
         auto sigma = mgu(sourceTerm, *maybeSubterm);
         if (!sigma)
+            continue;
+
+        // check ordering side-conditions
+        if (!kboGreater(applySubstitution(*sigma, sourceTerm),
+                        applySubstitution(*sigma, replacement)))
+            continue;
+
+        Clause sigmaD = applySubstitution(*sigma, D);
+        if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
+            continue;
+
+        Clause sigmaC = applySubstitution(*sigma, D);
+        if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, cLit)))
             continue;
 
         Clause cCopy{-1, C.literals};
