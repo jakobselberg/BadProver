@@ -11,6 +11,7 @@
 
 #include "client.hpp"
 #include "config.hpp"
+#include "saturation.hpp"
 #include "tptp_parser.hpp"
 #include "util.hpp"
 int runClient(int argc, char *argv[])
@@ -64,10 +65,29 @@ int runClient(int argc, char *argv[])
         {
             printC(clause);
         }*/
-
+        ProofState proof;
+        proof.passive = std::move(formula);
         // STEP 3 prove it
+        SaturationResult result = saturate(proof);
 
-        return 0;
+        // Step 4 output result
+        if (result == SaturationResult::Unsatisfiable)
+        {
+            std::cout << "c UNSATISFIABLE" << std::endl;
+            return EXIT_UNSAT;
+        }
+        else if (result == SaturationResult::Saturated)
+        {
+            std::cout << "c Saturated" << std::endl;
+            return EXIT_SAT;
+        }
+        else
+        {
+            std::cout << "c UNKNOWN" << std::endl;
+            std::cout << "Iteration Budget reached" << std::endl;
+
+            return EXIT_UNKNOWN;
+        }
     });
 
     // Now, start a worker thread for executing the actual Prover, and just wait in the main
@@ -107,6 +127,7 @@ int runClient(int argc, char *argv[])
             // timeout was reached: abandon worker thread and exit with an error
             solver_worker.detach();
             std::cout << "c UNKNOWN" << std::endl;
+            std::cout << "Timeout reached" << std::endl;
 
             return EXIT_UNKNOWN;
         }

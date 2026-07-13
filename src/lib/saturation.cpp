@@ -64,6 +64,10 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
         state.active.push_back(given);
+        /*for (auto cl : state.active)
+        {
+            printC(cl);
+        }*/
 
         std::vector<Clause> generated;
 

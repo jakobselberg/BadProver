@@ -1,6 +1,7 @@
 #pragma once
 #include "cnf.hpp"
 #include "inference.hpp"
+#include "util.hpp"
 #include <cstddef> // for std::size_t
 
 enum class SaturationResult
