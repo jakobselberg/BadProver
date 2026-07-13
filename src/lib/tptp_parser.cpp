@@ -18,8 +18,16 @@ const Term &tptpTrueImpl()
 
 class Parser
 {
+
+    std::string baseDir_;
+
   public:
     explicit Parser(std::string_view src) : src_(src)
+    {
+    }
+
+    explicit Parser(std::string_view src, std::string baseDir)
+        : src_(src), baseDir_(std::move(baseDir))
     {
     }
 
@@ -174,6 +182,17 @@ class Parser
         if (atEnd() || !((c >= 'A' && c <= 'Z') || c == '_'))
             error("expected " + what + " (a variable starting with upper-case or _)");
         return readWord();
+    }
+
+    std::string parseSingleQuotedString()
+    {
+        skipWhitespaceAndComments();
+        expect('\'', "single-quoted string");
+        std::string result;
+        while (!atEnd() && peek() != '\'')
+            result += advance();
+        expect('\'', "closing single quote");
+        return result;
     }
 
     // Integer name (used for cnf(123, ...)).
