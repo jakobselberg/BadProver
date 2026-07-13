@@ -472,5 +472,9 @@ std::vector<Clause> parseTPTPCNFFromFile(const std::string &path)
     std::ostringstream oss;
     oss << in.rdbuf();
     std::string contents = oss.str();
-    return parseTPTPCNF(contents);
+
+    std::string dir = path.substr(0, path.rfind('/'));
+    Parser p(contents, dir.empty() ? "." : dir);
+
+    return p.parseFile();
 }
