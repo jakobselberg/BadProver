@@ -94,7 +94,25 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             {
                 return SaturationResult::Unsatisfiable;
             }
-            state.passive.push_back(conclusion);
+
+            // detect duplicates
+            bool duplicate = false;
+            for (const auto &c : state.active)
+                if (c.literals == conclusion.literals)
+                {
+                    duplicate = true;
+                    break;
+                }
+            if (!duplicate)
+                for (const auto &c : state.passive)
+                    if (c.literals == conclusion.literals)
+                    {
+                        duplicate = true;
+                        break;
+                    }
+
+            if (!duplicate)
+                state.passive.push_back(conclusion);
         }
     }
 
