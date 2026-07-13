@@ -202,3 +202,81 @@ bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit)
     }
     return true;
 }
+
+Comparison compareClauses(const Clause &a, const Clause &b)
+{
+    std::vector<Literal> m(a.literals.begin(), a.literals.end());
+    std::vector<Literal> n(b.literals.begin(), b.literals.end());
+
+    std::vector<bool> nUsed(n.size(), false);
+    std::vector<Literal> mRest;
+    for (const auto &x : m)
+    {
+        bool matched = false;
+        for (std::size_t j = 0; j < n.size(); ++j)
+        {
+            if (!nUsed[j] && x == n[j])
+            {
+                nUsed[j] = true;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched)
+            mRest.push_back(x);
+    }
+
+    std::vector<Literal> nRest;
+    for (std::size_t j = 0; j < n.size(); ++j)
+    {
+        if (!nUsed[j])
+            nRest.push_back(n[j]);
+    }
+
+    if (mRest.empty() && nRest.empty())
+        return Comparison::Equal;
+    if (mRest.empty())
+        return Comparison::Less;
+    if (nRest.empty())
+        return Comparison::Greater;
+
+    bool mGreater = true;
+    for (const auto &y : nRest)
+    {
+        bool covered = false;
+        for (const auto &x : mRest)
+            if (compareLiterals(x, y) == Comparison::Greater)
+            {
+                covered = true;
+                break;
+            }
+        if (!covered)
+        {
+            mGreater = false;
+            break;
+        }
+    }
+    if (mGreater)
+        return Comparison::Greater;
+
+    bool nGreater = true;
+    for (const auto &x : mRest)
+    {
+        bool covered = false;
+        for (const auto &y : nRest)
+            if (compareLiterals(y, x) == Comparison::Greater)
+            {
+                covered = true;
+                break;
+            }
+        if (!covered)
+        {
+            nGreater = false;
+            break;
+        }
+    }
+    if (nGreater)
+        return Comparison::Less;
+
+    return Comparison::Incomparable;
+}
