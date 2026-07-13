@@ -184,8 +184,10 @@ std::vector<Clause> equalityFactoring(const Clause &C)
                 // orientation
                 const Term &l2Big = l2LeftActive[k] ? l2.left : l2.right;
                 const Term &l2Small = l2LeftActive[k] ? l2.right : l2.left;
-                if (!kboGreater(applySubstitution(*sigma, l2Big),
-                                applySubstitution(*sigma, l2Small)))
+
+                auto cmp = kboCompare(applySubstitution(*sigma, l2Big),
+                                      applySubstitution(*sigma, l2Small));
+                if (cmp == Comparison::Less || cmp == Comparison::Equal)
                     continue;
 
                 // maximality of equality
