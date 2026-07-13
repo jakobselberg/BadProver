@@ -163,51 +163,50 @@ std::vector<Clause> equalityFactoring(const Clause &C)
             const Literal &l1 = eqLits[i];
             const Literal &l2 = eqLits[j];
 
-            // Without ordering we would actually need to consider way more combinations(see below),
-            // this is incomplete.
-
-            /*const std::array<std::pair<Term, Term>, 4> unifyPairs = {{
+            const std::array<std::pair<Term, Term>, 4> unifyPairs = {{
                 {l1.left, l2.left},
                 {l1.left, l2.right},
                 {l1.right, l2.left},
                 {l1.right, l2.right},
             }};
+
             const std::array<std::pair<Term, Term>, 4> remainingPairs = {{
                 {l1.right, l2.right},
                 {l1.right, l2.left},
                 {l1.left, l2.right},
                 {l1.left, l2.left},
-            }};*/
+            }};
 
-            auto sigma = mgu(l1.left, l2.left);
-            if (!sigma)
-                continue;
+            const std::array<bool, 4> l2LeftActive = {true, false, true, false};
 
-            Clause base{-1, C.literals};
-            base.literals.erase(l1);
-            base = applySubstitution(*sigma, base);
+            for (std::size_t k = 0; k < 4; ++k)
+            {
+                auto sigma = mgu(unifyPairs[k].first, unifyPairs[k].second);
+                if (!sigma)
+                    continue;
 
-            Term leftRem = applySubstitution(*sigma, l1.right);
-            Term rightRem = applySubstitution(*sigma, l2.right);
-            Literal newEq = makeLiteral(std::move(leftRem), std::move(rightRem), false);
-            base.literals.insert(std::move(newEq));
+                // orientation
+                const Term &l2Big = l2LeftActive[k] ? l2.left : l2.right;
+                const Term &l2Small = l2LeftActive[k] ? l2.right : l2.left;
+                if (!kboGreater(applySubstitution(*sigma, l2Big),
+                                applySubstitution(*sigma, l2Small)))
+                    continue;
 
-            addClauseIfUseful(results, std::move(base));
+                // maximality of equality
+                Clause sigmaC = applySubstitution(*sigma, C);
+                if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, l2)))
+                    continue;
 
-            auto sigma2 = mgu(l1.left, l2.right);
-            if (!sigma2)
-                continue;
+                Clause base{-1, C.literals};
+                base.literals.erase(l1);
+                base = applySubstitution(*sigma, base);
 
-            Clause base2{-1, C.literals};
-            base2.literals.erase(l1);
-            base2 = applySubstitution(*sigma2, base2);
+                Term leftRem = applySubstitution(*sigma, remainingPairs[k].first);
+                Term rightRem = applySubstitution(*sigma, remainingPairs[k].second);
+                base.literals.insert(makeLiteral(std::move(leftRem), std::move(rightRem), false));
 
-            Term leftRem2 = applySubstitution(*sigma2, l1.right);
-            Term rightRem2 = applySubstitution(*sigma2, l2.left);
-            Literal newEq2 = makeLiteral(std::move(leftRem2), std::move(rightRem2), false);
-            base2.literals.insert(std::move(newEq2));
-
-            addClauseIfUseful(results, std::move(base2));
+                addClauseIfUseful(results, std::move(base));
+            }
         }
     }
     return results;
