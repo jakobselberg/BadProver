@@ -30,19 +30,17 @@ struct FunctionSymbol
     std::string name;
     TermType resultType = TermType::Individual;
 
-    // A well-formed signature never assigns two result types to the same
-    // symbol.  Keeping the sort out of structural identity preserves the
-    // existing syntactic identity of terms while the Signature enforces that
-    // invariant at construction time.
     auto operator<=>(const FunctionSymbol &other) const
     {
         if (auto byArity = arity <=> other.arity; byArity != 0)
             return byArity;
-        return name <=> other.name;
+        if (auto byName = name <=> other.name; byName != 0)
+            return byName;
+        return resultType <=> other.resultType;
     }
     bool operator==(const FunctionSymbol &other) const
     {
-        return arity == other.arity && name == other.name;
+        return arity == other.arity && name == other.name && resultType == other.resultType;
     }
 };
 

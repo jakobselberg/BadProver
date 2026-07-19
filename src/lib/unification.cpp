@@ -23,6 +23,11 @@ std::optional<Substitution> mgu(std::vector<std::pair<Term, Term>> equations)
         auto [s, t] = std::move(equations.back());
         equations.pop_back();
 
+        // Variables are individuals.  Therefore no unifier may relate an
+        // individual term and a Boolean predicate term.
+        if (termType(s) != termType(t))
+            return std::nullopt;
+
         const auto *sv = std::get_if<Variable>(&s);
         const auto *tv = std::get_if<Variable>(&t);
 
@@ -53,7 +58,7 @@ std::optional<Substitution> mgu(std::vector<std::pair<Term, Term>> equations)
 
         const auto &f = *std::get<FunctionApplicationRef>(s);
         const auto &g = *std::get<FunctionApplicationRef>(t);
-        if (f.symbol.name != g.symbol.name || f.symbol.arity != g.symbol.arity)
+        if (f.symbol != g.symbol)
             return std::nullopt; // clash
 
         for (std::size_t i = 0; i < f.arguments.size(); ++i)

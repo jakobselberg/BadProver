@@ -38,7 +38,7 @@ Literal eq(Term l, Term r, bool pos = true)
 Literal pred(const std::string &name, std::vector<Term> args, bool positive)
 {
     int arity = static_cast<int>(args.size());
-    return Literal{makeFunctionApplication(FunctionSymbol{arity, name}, std::move(args)),
+    return Literal{makeFunctionApplication(FunctionSymbol{arity, name, TermType::Boolean}, std::move(args)),
                    tptpTrue(), positive};
 }
 

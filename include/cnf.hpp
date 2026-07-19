@@ -2,6 +2,8 @@
 #include "terms.hpp"
 
 #include <optional>
+#include <stdexcept>
+#include <utility>
 
 enum class SymbolKind
 {
@@ -46,6 +48,13 @@ struct Literal
     Term left;
     Term right;
     bool positive = true;
+
+    Literal(Term left, Term right, bool positive = true)
+        : left(std::move(left)), right(std::move(right)), positive(positive)
+    {
+        if (termType(this->left) != termType(this->right))
+            throw std::invalid_argument("both sides of an equality must have the same type");
+    }
 
     // Lexicographic ordering for use in sets
     auto operator<=>(const Literal &other) const = default;

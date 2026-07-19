@@ -1,5 +1,20 @@
 #include "terms.hpp"
 
+#include <stdexcept>
+
+namespace
+{
+void validateSubstitution(const Substitution &substitution)
+{
+    for (const auto &[variable, term] : substitution)
+    {
+        (void)variable;
+        if (termType(term) != TermType::Individual)
+            throw std::invalid_argument("a variable cannot be substituted by a Boolean term");
+    }
+}
+} // namespace
+
 bool FunctionApplicationRef::operator==(const FunctionApplicationRef &other) const
 {
     if (ptr == other.ptr)
@@ -22,6 +37,13 @@ std::strong_ordering FunctionApplicationRef::operator<=>(const FunctionApplicati
 
 Term makeFunctionApplication(FunctionSymbol symbol, std::vector<Term> arguments)
 {
+    if (symbol.arity != static_cast<int>(arguments.size()))
+        throw std::invalid_argument("function application has the wrong number of arguments");
+    for (const Term &argument : arguments)
+    {
+        if (termType(argument) != TermType::Individual)
+            throw std::invalid_argument("a function or predicate argument must have individual type");
+    }
     return FunctionApplicationRef{std::make_shared<const FunctionApplication>(
         FunctionApplication{std::move(symbol), std::move(arguments)})};
 };
@@ -42,6 +64,7 @@ std::set<Variable> GetFreeVariables(const Term &t)
 
 Term applySubstitution(const Substitution &substitution, const Term &t)
 {
+    validateSubstitution(substitution);
     if (auto v = std::get_if<Variable>(&t))
     {
         auto substitutionIterator = substitution.find(*v);
@@ -64,6 +87,8 @@ Term applySubstitution(const Substitution &substitution, const Term &t)
 
 Substitution composeSubstitutions(const Substitution &first, const Substitution &second)
 {
+    validateSubstitution(first);
+    validateSubstitution(second);
     Substitution result = second;
     for (const auto &[x, t] : first)
     {
@@ -104,7 +129,11 @@ std::optional<Term> getSubtermAt(const Term &t, const Position &pos)
 std::optional<Term> setSubtermAt(const Term &t, const Position &pos, const Term &replacement)
 {
     if (pos.empty())
+    {
+        if (termType(t) != termType(replacement))
+            return std::nullopt;
         return replacement;
+    }
 
     if (std::get_if<Variable>(&t))
         return std::nullopt;

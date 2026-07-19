@@ -47,6 +47,8 @@ int comparePrecedence(const FunctionSymbol &f, const FunctionSymbol &g)
         return f.arity < g.arity ? -1 : 1;
     if (f.name != g.name)
         return f.name < g.name ? -1 : 1;
+    if (f.resultType != g.resultType)
+        return f.resultType < g.resultType ? -1 : 1;
     return 0;
 }
 
