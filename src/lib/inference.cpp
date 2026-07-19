@@ -53,7 +53,7 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
             continue;
 
-        Clause sigmaC = applySubstitution(*sigma, D);
+        Clause sigmaC = applySubstitution(*sigma, C);
         if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, cLit)))
             continue;
 
