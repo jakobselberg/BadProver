@@ -99,10 +99,10 @@ TEST_CASE("equality factoring")
                    std::set<Literal>{eq(V("X"), Const("a"), true), eq(V("X"), Const("b"), true)}};
     // printC(clauseC);
     auto results = equalityFactoring(clauseC);
-    for (const auto &cl : results)
+    /*for (const auto &cl : results)
     {
         printC(cl);
-    }
+    }*/
     REQUIRE(results.size() <= 2);
     CHECK(std::any_of(results.begin(), results.end(), [&](const Clause &cl) {
         return cl.literals.contains(eq(Const("a"), Const("b"), false)) ||
