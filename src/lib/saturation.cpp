@@ -105,6 +105,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         {
             conclusion.id = state.next_id++;
             removeFalseLiterals(conclusion);
+            conclusion = demodulate(conclusion, state.active);
             if (isEmptyClause(conclusion))
             {
                 return SaturationResult::Unsatisfiable;
