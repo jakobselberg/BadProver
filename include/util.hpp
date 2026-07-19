@@ -5,6 +5,7 @@ std::string printTerm(const Term &t);
 std::string printLiteral(const Literal &lit);
 std::string printClause(const Clause &clause);
 void printC(const Clause &clause);
+void printSignature(const Signature &signature);
 
 std::string load_file_from_path(const std::string &path);
 

@@ -15,12 +15,35 @@ struct Variable
     bool operator==(const Variable &) const = default;
 };
 
+// The two sorts used by the untyped TPTP fragment.  Variables and ordinary
+// function applications denote individuals; predicate applications denote
+// booleans.
+enum class TermType
+{
+    Individual,
+    Boolean,
+};
+
 struct FunctionSymbol
 {
     int arity;
     std::string name;
-    auto operator<=>(const FunctionSymbol &) const = default;
-    bool operator==(const FunctionSymbol &) const = default;
+    TermType resultType = TermType::Individual;
+
+    // A well-formed signature never assigns two result types to the same
+    // symbol.  Keeping the sort out of structural identity preserves the
+    // existing syntactic identity of terms while the Signature enforces that
+    // invariant at construction time.
+    auto operator<=>(const FunctionSymbol &other) const
+    {
+        if (auto byArity = arity <=> other.arity; byArity != 0)
+            return byArity;
+        return name <=> other.name;
+    }
+    bool operator==(const FunctionSymbol &other) const
+    {
+        return arity == other.arity && name == other.name;
+    }
 };
 
 struct FunctionApplication;
@@ -55,6 +78,7 @@ struct FunctionApplication
 };
 
 Term makeFunctionApplication(FunctionSymbol symbol, std::vector<Term> arguments);
+TermType termType(const Term &t);
 
 using Substitution = std::map<Variable, Term>;
 using Position = std::vector<int>;

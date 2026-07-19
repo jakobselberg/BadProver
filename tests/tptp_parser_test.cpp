@@ -179,3 +179,25 @@ TEST_CASE("nested function applications round-trip")
     Term lhs = F("f", {F("g", {V("X")}), F("h", {C("a"), V("Y")})});
     CHECK(cs[0].literals.contains(eq(lhs, C("b"), true)));
 }
+
+TEST_CASE("rejects a predicate application used as a function argument")
+{
+    CHECK_THROWS_AS(parseTPTPCNF("cnf(c1, axiom, p(X)).\n"
+                                 "cnf(c2, axiom, f(p(X)) = a)."),
+                    TPTPParseError);
+}
+
+TEST_CASE("rejects a function symbol used later as a predicate")
+{
+    CHECK_THROWS_AS(parseTPTPCNF("cnf(c1, axiom, f(X) = a).\n"
+                                 "cnf(c2, axiom, f(X))."),
+                    TPTPParseError);
+}
+
+TEST_CASE("signature preserves Boolean type for predicate applications")
+{
+    Signature signature;
+    Term predicate = signature.applyPredicate("p", {V("X")});
+    CHECK(termType(predicate) == TermType::Boolean);
+    CHECK_THROWS_AS(signature.applyFunction("f", {predicate}), std::invalid_argument);
+}

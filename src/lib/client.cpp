@@ -60,11 +60,13 @@ int runClient(int argc, char *argv[])
     // Define a task which runs the solver and handles in- and output
     std::packaged_task<int()> solver_task([] {
         // STEP 2: parse input file into a formula
-        std::vector<Clause> formula = parseTPTPCNFFromFile(get_config_file_path());
-        /*for (const Clause &clause : formula)
+        Signature signature;
+        std::vector<Clause> formula = parseTPTPCNFFromFile(get_config_file_path(), signature);
+        printSignature(signature);
+        for (const Clause &clause : formula)
         {
             printC(clause);
-        }*/
+        }
         ProofState proof;
         proof.passive = std::move(formula);
 

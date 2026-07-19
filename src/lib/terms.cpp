@@ -77,6 +77,13 @@ Substitution composeSubstitutions(const Substitution &first, const Substitution 
     return result;
 }
 
+TermType termType(const Term &t)
+{
+    if (std::holds_alternative<Variable>(t))
+        return TermType::Individual;
+    return std::get<FunctionApplicationRef>(t)->symbol.resultType;
+}
+
 std::optional<Term> getSubtermAt(const Term &t, const Position &pos)
 {
     if (pos.empty())

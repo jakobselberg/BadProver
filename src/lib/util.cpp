@@ -79,6 +79,17 @@ void printC(const Clause &clause)
     std::cout << printClause(clause) << '\n';
 }
 
+void printSignature(const Signature &signature)
+{
+    std::cout << "c Signature:\n";
+    for (const auto &symbol : signature.declarations())
+    {
+        std::cout << "c   "
+                  << (symbol.kind == SymbolKind::Function ? "function  " : "predicate ")
+                  << symbol.name << "/" << symbol.arity << '\n';
+    }
+}
+
 std::string load_file_from_path(const std::string &path)
 {
     std::ifstream input_file_stream(path);
