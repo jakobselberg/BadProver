@@ -1,5 +1,6 @@
 #include "inference.hpp"
 #include "ordering.hpp"
+#include "tptp_parser.hpp"
 #include "unification.hpp"
 #include "util.hpp"
 #include <array>
@@ -40,6 +41,8 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         if (!maybeSubterm)
             continue;
 
+        if (!pos.empty() && replacement == tptpTrue())
+            continue;
         auto sigma = mgu(sourceTerm, *maybeSubterm);
         if (!sigma)
             continue;
@@ -53,7 +56,7 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
             continue;
 
-        Clause sigmaC = applySubstitution(*sigma, D);
+        Clause sigmaC = applySubstitution(*sigma, C);
         if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, cLit)))
             continue;
 

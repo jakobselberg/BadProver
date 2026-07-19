@@ -8,6 +8,16 @@ bool isEmptyClause(const Clause &c)
 
 namespace
 {
+
+static void removeFalseLiterals(Clause &c)
+{
+    std::set<Literal> kept;
+    for (const auto &lit : c.literals)
+        if (lit.positive || lit.left != lit.right)
+            kept.insert(lit);
+    c.literals = std::move(kept);
+}
+
 int termWeight(const Term &t)
 {
     if (std::holds_alternative<Variable>(t))
@@ -52,6 +62,10 @@ std::size_t selectGivenIndex(const std::vector<Clause> &passive)
 
 SaturationResult saturate(ProofState &state, int max_iteration)
 {
+
+    for (const auto &c : state.passive)
+        state.seen.insert(c.literals);
+
     for (int iteration = 0; iteration < max_iteration; ++iteration)
     {
         if (state.passive.empty())
@@ -64,10 +78,10 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
         state.active.push_back(given);
-        /*for (auto cl : state.active)
+        for (auto cl : state.active)
         {
             printC(cl);
-        }*/
+        }
 
         std::vector<Clause> generated;
 
@@ -90,28 +104,12 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         for (auto &conclusion : generated)
         {
             conclusion.id = state.next_id++;
+            removeFalseLiterals(conclusion);
             if (isEmptyClause(conclusion))
             {
                 return SaturationResult::Unsatisfiable;
             }
-
-            // detect duplicates
-            bool duplicate = false;
-            for (const auto &c : state.active)
-                if (c.literals == conclusion.literals)
-                {
-                    duplicate = true;
-                    break;
-                }
-            if (!duplicate)
-                for (const auto &c : state.passive)
-                    if (c.literals == conclusion.literals)
-                    {
-                        duplicate = true;
-                        break;
-                    }
-
-            if (!duplicate)
+            if (state.seen.insert(conclusion.literals).second)
                 state.passive.push_back(conclusion);
         }
     }

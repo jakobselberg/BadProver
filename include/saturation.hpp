@@ -16,6 +16,7 @@ struct ProofState
     std::vector<Clause> active;
     std::vector<Clause> passive;
     int next_id;
+    std::set<std::set<Literal>> seen;
 };
 
 // models a contradiction
