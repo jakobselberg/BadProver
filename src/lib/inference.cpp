@@ -54,6 +54,10 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
             continue;
 
         Clause sigmaD = applySubstitution(*sigma, D);
+        std::set<Literal> posSigmaD;
+        for (const auto &l : sigmaD.literals)
+            if (l.positive)
+                posSigmaD.insert(l);
         if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
             continue;
 
