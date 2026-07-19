@@ -5,6 +5,8 @@
 + hookup main to prover logic
 + find larger set of rellevant Problem files
 + modify parser to load axioms from additional files
++ make prove files
++ simplification rules
 
 # BadProver
 

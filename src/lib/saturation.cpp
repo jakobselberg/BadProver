@@ -50,6 +50,7 @@ std::size_t selectGivenIndex(const std::vector<Clause> &passive)
     return best;
 }
 
+// DISCOUNT Given-Clause-Loop
 SaturationResult saturate(ProofState &state, int max_iteration)
 {
     for (int iteration = 0; iteration < max_iteration; ++iteration)
@@ -58,17 +59,23 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         {
             return SaturationResult::Saturated;
         }
-
+        // 1 Choose and remove given clause from passive set
         std::size_t idx = selectGivenIndex(state.passive);
         Clause given = state.passive[idx];
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
+
+        // 2 Fowrard simplification
+        // 3 Backward simplification
+
+        // 4 Add C to the active set
         state.active.push_back(given);
         /*for (auto cl : state.active)
         {
             printC(cl);
         }*/
 
+        // 5 Perform inferences between C and active set
         std::vector<Clause> generated;
 
         auto equalityResolutionResult = equalityResolution(given);
