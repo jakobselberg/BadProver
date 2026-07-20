@@ -56,7 +56,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             return SaturationResult::Saturated;
         }
 
-        std::size_t idx = selectGivenIndex(state.passive);
+        std::size_t idx = selectGivenIndex(state.passive, iteration % 11 == 10);
         Clause given = state.passive[idx];
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
