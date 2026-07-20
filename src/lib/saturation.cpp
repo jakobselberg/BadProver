@@ -1,4 +1,8 @@
 #include "saturation.hpp"
+#include "selection.hpp"
+#include "simplification.hpp"
+#include "subsumption.hpp"
+#include <functional>
 #include <variant>
 
 bool isEmptyClause(const Clause &c)
@@ -9,56 +13,35 @@ bool isEmptyClause(const Clause &c)
 namespace
 {
 
-static void removeFalseLiterals(Clause &c)
+static Clause canonicalize(const Clause &c)
 {
-    std::set<Literal> kept;
-    for (const auto &lit : c.literals)
-        if (lit.positive || lit.left != lit.right)
-            kept.insert(lit);
-    c.literals = std::move(kept);
-}
+    std::map<std::string, std::string> mapping;
+    int count = 0;
 
-int termWeight(const Term &t)
-{
-    if (std::holds_alternative<Variable>(t))
-    {
-        return 1;
-    }
-    const auto &app = std::get<FunctionApplicationRef>(t);
-    int w = 1;
-    for (const auto &arg : app->arguments)
-    {
-        w += termWeight(arg);
-    }
-    return w;
-}
-} // namespace
-
-int clauseWeight(const Clause &c)
-{
-    int total = 0;
-    for (const auto &lit : c.literals)
-    {
-        total += termWeight(lit.left) + termWeight(lit.right);
-    }
-    return total;
-}
-
-std::size_t selectGivenIndex(const std::vector<Clause> &passive)
-{
-    std::size_t best = 0;
-    int best_weight = clauseWeight(passive[0]);
-    for (std::size_t i = 1; i < passive.size(); ++i)
-    {
-        int w = clauseWeight(passive[i]);
-        if (w < best_weight || (w == best_weight && passive[i].id < passive[best].id))
+    std::function<Term(const Term &)> canonTerm = [&](const Term &t) -> Term {
+        if (auto *v = std::get_if<Variable>(&t))
         {
-            best = i;
-            best_weight = w;
+            auto &mapped = mapping[v->name];
+            if (mapped.empty())
+                mapped = "_c" + std::to_string(count++);
+            return Variable{mapped};
         }
-    }
-    return best;
+        const auto &f = *std::get<FunctionApplicationRef>(t);
+        std::vector<Term> args;
+        for (const auto &arg : f.arguments)
+        {
+            args.push_back(canonTerm(arg));
+        }
+        return makeFunctionApplication(f.symbol, std::move(args));
+    };
+
+    Clause result{c.id, {}};
+    for (const auto &lit : c.literals)
+        result.literals.insert(Literal{canonTerm(lit.left), canonTerm(lit.right), lit.positive});
+    return result;
 }
+
+} // namespace
 
 SaturationResult saturate(ProofState &state, int max_iteration)
 {
@@ -78,10 +61,6 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
         state.active.push_back(given);
-        for (auto cl : state.active)
-        {
-            printC(cl);
-        }
 
         std::vector<Clause> generated;
 
@@ -106,12 +85,29 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             conclusion.id = state.next_id++;
             removeFalseLiterals(conclusion);
             conclusion = demodulate(conclusion, state.active);
+            removeFalseLiterals(conclusion);
+            bool subsumed = false;
+            for (const auto &lit : conclusion.literals)
+                if (lit.positive && lit.left == lit.right)
+                    goto next_conclusion;
+
             if (isEmptyClause(conclusion))
             {
                 return SaturationResult::Unsatisfiable;
             }
-            if (state.seen.insert(conclusion.literals).second)
+
+            for (const auto &active : state.active)
+                if (subsumes(active, conclusion))
+                {
+                    subsumed = true;
+                    break;
+                }
+            if (subsumed)
+                continue;
+
+            if (state.seen.insert(canonicalize(conclusion).literals).second)
                 state.passive.push_back(conclusion);
+        next_conclusion:;
         }
     }
 

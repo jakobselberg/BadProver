@@ -8,6 +8,17 @@
 namespace
 {
 
+static int gFreshVarCounter = 0;
+
+static Clause standardizeApart(const Clause &c)
+{
+    std::set<Variable> vars = FreeVariables(c);
+    Substitution renaming;
+    for (const auto &v : vars)
+        renaming[v] = Variable{"_v" + std::to_string(gFreshVarCounter++)};
+    return applySubstitution(renaming, c);
+}
+
 static Literal invertLiteral(const Literal &lit)
 {
     return Literal{lit.left, lit.right, !lit.positive};
@@ -58,7 +69,7 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         for (const auto &l : sigmaD.literals)
             if (l.positive)
                 posSigmaD.insert(l);
-        if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
+        if (!isMaximalLiteral(posSigmaD, applySubstitution(*sigma, dLit)))
             continue;
 
         if (cLit.positive)
@@ -102,98 +113,15 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
     }
 }
 
-static std::optional<Clause> tryDemodulateOnce(const Clause &C, const Term &lhs, const Term &rhs)
-{
-    std::set<Variable> clauseVars = FreeVariables(C);
-    for (const auto &lit : C.literals)
-    {
-        for (int side = 0; side < 2; ++side)
-        {
-            const Term &target = (side == 0) ? lit.left : lit.right;
-            for (const auto &pos : allSubtermPositions(target))
-            {
-                auto sub = getSubtermAt(target, pos);
-                if (!sub)
-                    continue;
-                auto sigma = mgu(lhs, *sub);
-                if (!sigma)
-                    continue;
-                bool bindsClauseVar = false;
-                for (const auto &[v, unused] : *sigma)
-                    if (clauseVars.count(v))
-                    {
-                        bindsClauseVar = true;
-                        break;
-                    }
-                if (bindsClauseVar)
-                    continue;
-                if (!kboGreater(applySubstitution(*sigma, lhs), applySubstitution(*sigma, rhs)))
-                    continue;
-                Term sigmaRhs = applySubstitution(*sigma, rhs);
-                if (!pos.empty() && sigmaRhs == tptpTrue())
-                    continue;
-                auto newTerm = setSubtermAt(target, pos, sigmaRhs);
-                if (!newTerm)
-                    continue;
-
-                Literal newLit = lit;
-                if (side == 0)
-                    newLit.left = *newTerm;
-                else
-                    newLit.right = *newTerm;
-                Clause result = {C.id, {}};
-                for (const auto &other : C.literals)
-                {
-                    if (other == lit)
-                        result.literals.insert(applySubstitution(*sigma, newLit));
-                    else
-                        result.literals.insert(applySubstitution(*sigma, other));
-                }
-                return result;
-            }
-        }
-    }
-    return std::nullopt;
-}
-
 } // namespace
-
-Clause demodulate(Clause C, const std::vector<Clause> &active)
-{
-    bool changed = true;
-    while (changed)
-    {
-        changed = false;
-        for (const auto &d : active)
-        {
-            if (d.literals.size() != 1)
-                continue;
-            const Literal &rule = *d.literals.begin();
-            if (!rule.positive)
-                continue;
-
-            for (const auto &[lhs, rhs] :
-                 {std::pair{rule.left, rule.right}, std::pair{rule.right, rule.left}})
-            {
-                auto result = tryDemodulateOnce(C, lhs, rhs);
-                if (result)
-                {
-                    C = std::move(*result);
-                    changed = true;
-                    break;
-                }
-            }
-            if (changed)
-                break;
-        }
-    }
-    return C;
-}
 
 std::vector<Clause> superposition(const Clause &D, const Clause &C)
 {
+
+    Clause dRenamed = standardizeApart(D);
+
     std::vector<Clause> results;
-    for (const auto &dLit : D.literals)
+    for (const auto &dLit : dRenamed.literals)
     {
         if (!dLit.positive)
             continue;
@@ -208,8 +136,8 @@ std::vector<Clause> superposition(const Clause &D, const Clause &C)
             for (const auto &cLit : C.literals)
             {
 
-                performSuperpositionStep(D, C, dLit, cLit, t, cLit.left, tPrime, results);
-                performSuperpositionStep(D, C, dLit, cLit, t, cLit.right, tPrime, results);
+                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.left, tPrime, results);
+                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.right, tPrime, results);
             }
         }
     }

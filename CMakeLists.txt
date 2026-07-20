@@ -21,6 +21,9 @@ add_library(atp_lib
     src/lib/util.cpp
     src/lib/config.cpp
     src/lib/client.cpp
+    src/lib/simplification.cpp
+    src/lib/subsumption.cpp
+    src/lib/selection.cpp
 
 )
 target_include_directories(atp_lib PUBLIC

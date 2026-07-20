@@ -22,8 +22,4 @@ struct ProofState
 // models a contradiction
 bool isEmptyClause(const Clause &c);
 
-int clauseWeight(const Clause &c);
-
-std::size_t selectGivenIndex(const std::vector<Clause> &passive);
-
 SaturationResult saturate(ProofState &state, int max_iteration = 10000);

@@ -1,13 +1,8 @@
-#include "saturation.hpp"
-#include <variant>
-
-bool isEmptyClause(const Clause &c)
-{
-    return c.literals.empty();
-}
+#include "selection.hpp"
 
 namespace
 {
+
 int termWeight(const Term &t)
 {
     if (std::holds_alternative<Variable>(t))
