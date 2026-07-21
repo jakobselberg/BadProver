@@ -176,60 +176,57 @@ std::vector<Clause> equalityFactoring(const Clause &C)
 
     for (std::size_t i = 0; i < eqLits.size(); ++i)
     {
-        for (std::size_t j = i + 1; j < eqLits.size(); ++j)
+        for (std::size_t j = 0; j < eqLits.size(); ++j)
         {
             if (i == j)
-            {
-                continue; // Skip the same literal
-            }
-            const Literal &l1 = eqLits[i];
-            const Literal &l2 = eqLits[j];
+                continue;
 
-            const std::array<std::pair<Term, Term>, 4> unifyPairs = {{
-                {l1.left, l2.left},
-                {l1.left, l2.right},
-                {l1.right, l2.left},
-                {l1.right, l2.right},
+            const Literal &first = eqLits[i];
+            const Literal &second = eqLits[j];
+
+            // Ordered equality factoring:
+            //
+            //   C | s = t | u = v
+            // ---------------------  sigma = mgu(s, u), s sigma is < t sigma
+            // C sigma | s sigma = t sigma | t sigma != v sigma
+            //
+            // The first equality is the maximal, oriented equality.  Either
+            // side of the second equality may be the side unified with s.
+            const std::array<std::pair<Term, Term>, 2> firstOrientations = {{
+                {first.left, first.right},
+                {first.right, first.left},
+            }};
+            const std::array<std::pair<Term, Term>, 2> secondOrientations = {{
+                {second.left, second.right},
+                {second.right, second.left},
             }};
 
-            const std::array<std::pair<Term, Term>, 4> remainingPairs = {{
-                {l1.right, l2.right},
-                {l1.right, l2.left},
-                {l1.left, l2.right},
-                {l1.left, l2.left},
-            }};
-
-            const std::array<bool, 4> l2LeftActive = {true, false, true, false};
-
-            for (std::size_t k = 0; k < 4; ++k)
+            for (const auto &[s, t] : firstOrientations)
             {
-                auto sigma = mgu(unifyPairs[k].first, unifyPairs[k].second);
-                if (!sigma)
-                    continue;
+                for (const auto &[u, v] : secondOrientations)
+                {
+                    auto sigma = mgu(s, u);
+                    if (!sigma)
+                        continue;
 
-                // orientation
-                const Term &l2Big = l2LeftActive[k] ? l2.left : l2.right;
-                const Term &l2Small = l2LeftActive[k] ? l2.right : l2.left;
+                    if (kboCompare(applySubstitution(*sigma, s), applySubstitution(*sigma, t)) !=
+                        Comparison::Less)
+                        continue;
 
-                auto cmp = kboCompare(applySubstitution(*sigma, l2Big),
-                                      applySubstitution(*sigma, l2Small));
-                if (cmp == Comparison::Less || cmp == Comparison::Equal)
-                    continue;
+                    Clause sigmaC = applySubstitution(*sigma, C);
+                    if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, first)))
+                        continue;
 
-                // maximality of equality
-                Clause sigmaC = applySubstitution(*sigma, C);
-                if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, l2)))
-                    continue;
+                    Clause conclusion{-1, C.literals};
+                    conclusion.literals.erase(second);
+                    conclusion = applySubstitution(*sigma, conclusion);
 
-                Clause base{-1, C.literals};
-                base.literals.erase(l1);
-                base = applySubstitution(*sigma, base);
-
-                Term leftRem = applySubstitution(*sigma, remainingPairs[k].first);
-                Term rightRem = applySubstitution(*sigma, remainingPairs[k].second);
-                base.literals.insert(makeLiteral(std::move(leftRem), std::move(rightRem), false));
-
-                addClauseIfUseful(results, std::move(base));
+                    Term remainingFirst = applySubstitution(*sigma, t);
+                    Term remainingSecond = applySubstitution(*sigma, v);
+                    conclusion.literals.insert(
+                        makeLiteral(std::move(remainingFirst), std::move(remainingSecond), false));
+                    addClauseIfUseful(results, std::move(conclusion));
+                }
             }
         }
     }

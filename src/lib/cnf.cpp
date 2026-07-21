@@ -1,5 +1,58 @@
 #include "cnf.hpp"
 
+#include <stdexcept>
+
+Signature::Signature()
+{
+    // $true is the Boolean value used to reify predicate literals.
+    symbols_.emplace("$true", Entry{SymbolKind::Predicate, 0});
+}
+
+std::optional<SymbolKind> Signature::lookup(const std::string &name) const
+{
+    auto it = symbols_.find(name);
+    if (it == symbols_.end())
+        return std::nullopt;
+    return it->second.kind;
+}
+
+std::vector<Signature::SymbolDeclaration> Signature::declarations() const
+{
+    std::vector<SymbolDeclaration> result;
+    result.reserve(symbols_.size());
+    for (const auto &[name, entry] : symbols_)
+        result.push_back(SymbolDeclaration{name, entry.kind, entry.arity});
+    return result;
+}
+
+Term Signature::applyFunction(std::string name, std::vector<Term> arguments)
+{
+    return apply(SymbolKind::Function, std::move(name), std::move(arguments));
+}
+
+Term Signature::applyPredicate(std::string name, std::vector<Term> arguments)
+{
+    return apply(SymbolKind::Predicate, std::move(name), std::move(arguments));
+}
+
+Term Signature::apply(SymbolKind kind, std::string name, std::vector<Term> arguments)
+{
+    const int arity = static_cast<int>(arguments.size());
+    for (const Term &argument : arguments)
+    {
+        if (termType(argument) != TermType::Individual)
+            throw std::invalid_argument("a symbol argument must have individual type");
+    }
+
+    auto [it, inserted] = symbols_.emplace(name, Entry{kind, arity});
+    if (!inserted && (it->second.kind != kind || it->second.arity != arity))
+        throw std::invalid_argument("inconsistent use of symbol '" + name + "'");
+
+    TermType resultType = kind == SymbolKind::Function ? TermType::Individual : TermType::Boolean;
+    return makeFunctionApplication(FunctionSymbol{arity, std::move(name), resultType},
+                                   std::move(arguments));
+}
+
 // Literals
 Literal makeLiteral(Term left, Term right, bool positive)
 {

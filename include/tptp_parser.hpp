@@ -24,6 +24,8 @@ const Term &tptpTrue();
 // Unsupported constructs (fof/tff/thf/include/distinct objects/numbers/...)
 // = everything else triggers a TPTPParseError
 std::vector<Clause> parseTPTPCNF(std::string_view input);
+std::vector<Clause> parseTPTPCNF(std::string_view input, Signature &signature);
 
 // read a problem file and parse it
 std::vector<Clause> parseTPTPCNFFromFile(const std::string &path);
+std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, Signature &signature);

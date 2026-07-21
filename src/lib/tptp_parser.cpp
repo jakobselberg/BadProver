@@ -12,7 +12,7 @@ namespace
 // separate implementation so we can keep details inside anonymous namespace
 const Term &tptpTrueImpl()
 {
-    static const Term t = makeFunctionApplication(FunctionSymbol{0, "$true"}, {});
+    static const Term t = makeFunctionApplication(FunctionSymbol{0, "$true", TermType::Boolean}, {});
     return t;
 }
 
@@ -26,6 +26,11 @@ class Parser
 
     explicit Parser(std::string_view src, std::string baseDir)
         : src_(src), baseDir_(std::move(baseDir))
+    {
+    }
+
+    Parser(std::string_view src, std::string baseDir, Signature &signature)
+        : src_(src), baseDir_(std::move(baseDir)), signature_(&signature)
     {
     }
 
@@ -67,6 +72,8 @@ class Parser
     std::size_t pos_ = 0;
 
     std::string baseDir_;
+    Signature ownedSignature_;
+    Signature *signature_ = &ownedSignature_;
 
     [[noreturn]] void error(const std::string &msg) const
     {
@@ -305,7 +312,7 @@ class Parser
         std::string contents = oss.str();
 
         std::string includedDir = fullPath.substr(0, fullPath.rfind('/'));
-        Parser sub(contents, includedDir);
+        Parser sub(contents, includedDir, *signature_);
         return sub.parseFile();
     }
 
@@ -359,27 +366,27 @@ class Parser
 
         // Otherwise: parse a term first, then look for '=' / '!=' to decide
         // between an equality literal and a reified predicate literal.
-        Term t = parseTerm();
+        Term t = parseTerm(false);
         skipWhitespaceAndComments();
         char c = peek();
         if (c == '=')
         {
             ++pos_;
-            Term r = parseTerm();
-            return Literal{std::move(t), std::move(r), true};
+            Term r = parseTerm(false);
+            return Literal{asFunction(std::move(t)), asFunction(std::move(r)), true};
         }
         if (c == '!' && peekAt(1) == '=')
         {
             pos_ += 2;
-            Term r = parseTerm();
-            return Literal{std::move(t), std::move(r), false};
+            Term r = parseTerm(false);
+            return Literal{asFunction(std::move(t)), asFunction(std::move(r)), false};
         }
         // No equality follows: the term we just parsed must in fact be a
         // predicate application (a lower-word-headed term), which we reify
         // as `t = $true`.
         if (std::holds_alternative<Variable>(t))
             error("a bare variable cannot be a literal");
-        return Literal{std::move(t), tptpTrueImpl(), true};
+        return Literal{asPredicate(std::move(t)), tptpTrueImpl(), true};
     }
 
     // After '~', the next thing must be a predicate atom (not an equality and
@@ -390,7 +397,7 @@ class Parser
     Literal parsePlainAtom()
     {
         skipWhitespaceAndComments();
-        Term t = parseTerm();
+        Term t = parseTerm(false);
         if (std::holds_alternative<Variable>(t))
             error("a bare variable cannot be an atom");
         // Disallow `~ s = t` to keep the grammar unambiguous.
@@ -399,11 +406,14 @@ class Parser
         if (c == '=' || (c == '!' && peekAt(1) == '='))
             error("'~' may not be followed by an equality literal; "
                   "use '!=' instead");
-        return Literal{std::move(t), tptpTrueImpl(), true};
+        return Literal{asPredicate(std::move(t)), tptpTrueImpl(), true};
     }
 
     // term := variable | function_application
-    Term parseTerm()
+    // The outermost application in a literal is ambiguous until we see
+    // whether it is followed by equality.  Nested applications are always
+    // functions because they occur as arguments.
+    Term parseTerm(bool classifyHead = true)
     {
         skipWhitespaceAndComments();
         if (atEnd())
@@ -438,6 +448,8 @@ class Parser
                 skipWhitespaceAndComments();
                 expect(')', "to close function argument list");
             }
+            if (classifyHead)
+                return applySymbol(SymbolKind::Function, std::move(name), std::move(args));
             int arity = static_cast<int>(args.size());
             return makeFunctionApplication(FunctionSymbol{arity, std::move(name)}, std::move(args));
         }
@@ -448,6 +460,36 @@ class Parser
         if (c == '$')
             error("built-in $-prefixed symbols are not supported");
         error(std::string("unexpected character '") + c + "' while parsing a term");
+    }
+
+    Term asFunction(Term term)
+    {
+        if (std::holds_alternative<Variable>(term))
+            return term;
+        const auto &app = *std::get<FunctionApplicationRef>(term);
+        return applySymbol(SymbolKind::Function, app.symbol.name, app.arguments);
+    }
+
+    Term asPredicate(Term term)
+    {
+        if (std::holds_alternative<Variable>(term))
+            error("a bare variable cannot be a literal");
+        const auto &app = *std::get<FunctionApplicationRef>(term);
+        return applySymbol(SymbolKind::Predicate, app.symbol.name, app.arguments);
+    }
+
+    Term applySymbol(SymbolKind kind, std::string name, std::vector<Term> arguments)
+    {
+        try
+        {
+            return kind == SymbolKind::Function
+                       ? signature_->applyFunction(std::move(name), std::move(arguments))
+                       : signature_->applyPredicate(std::move(name), std::move(arguments));
+        }
+        catch (const std::invalid_argument &e)
+        {
+            error(e.what());
+        }
     }
 };
 
@@ -464,6 +506,12 @@ std::vector<Clause> parseTPTPCNF(std::string_view input)
     return p.parseFile();
 }
 
+std::vector<Clause> parseTPTPCNF(std::string_view input, Signature &signature)
+{
+    Parser p(input, "", signature);
+    return p.parseFile();
+}
+
 std::vector<Clause> parseTPTPCNFFromFile(const std::string &path)
 {
     std::ifstream in(path);
@@ -476,5 +524,19 @@ std::vector<Clause> parseTPTPCNFFromFile(const std::string &path)
     std::string dir = path.substr(0, path.rfind('/'));
     Parser p(contents, dir.empty() ? "." : dir);
 
+    return p.parseFile();
+}
+
+std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, Signature &signature)
+{
+    std::ifstream in(path);
+    if (!in)
+        throw TPTPParseError("could not open file: " + path);
+    std::ostringstream oss;
+    oss << in.rdbuf();
+    std::string contents = oss.str();
+
+    std::string dir = path.substr(0, path.rfind('/'));
+    Parser p(contents, dir.empty() ? "." : dir, signature);
     return p.parseFile();
 }

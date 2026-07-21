@@ -60,8 +60,14 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         Clause given = state.passive[idx];
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
+
+        // 2 Fowrard simplification
+        // 3 Backward simplification
+
+        // 4 Add C to the active set
         state.active.push_back(given);
 
+        // 5 Perform inferences between C and active set
         std::vector<Clause> generated;
 
         auto equalityResolutionResult = equalityResolution(given);

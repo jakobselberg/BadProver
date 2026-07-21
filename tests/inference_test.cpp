@@ -39,8 +39,9 @@ Literal eq(Term l, Term r, bool pos = true)
 Literal pred(const std::string &name, std::vector<Term> args, bool positive)
 {
     int arity = static_cast<int>(args.size());
-    return Literal{makeFunctionApplication(FunctionSymbol{arity, name}, std::move(args)),
-                   tptpTrue(), positive};
+    return Literal{
+        makeFunctionApplication(FunctionSymbol{arity, name, TermType::Boolean}, std::move(args)),
+        tptpTrue(), positive};
 }
 
 } // namespace
@@ -102,8 +103,9 @@ TEST_CASE("equality factoring")
     {
         printC(cl);
     }*/
-    REQUIRE(results.size() >= 1);
+    REQUIRE(results.size() <= 2);
     CHECK(std::any_of(results.begin(), results.end(), [&](const Clause &cl) {
-        return cl.literals.contains(eq(Const("a"), Const("b"), false));
+        return cl.literals.contains(eq(Const("a"), Const("b"), false)) ||
+               cl.literals.contains(eq(Const("b"), Const("a"), false));
     }));
 }
