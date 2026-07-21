@@ -29,9 +29,19 @@ int runClient(int argc, char *argv[])
                           "Set the maximum wall-clock time allowed for the solver to finish, in "
                           "seconds. Setting 0 disables the timeout. Default: 0",
                           cxxopts::value<unsigned long long>()->default_value("0"));
+<<<<<<< HEAD
     options.add_options()("v, verbose",
                           "Print the parsed signature and input clauses before saturation starts",
                           cxxopts::value<bool>()->default_value("false"));
+=======
+    options.add_options()(
+        "proof-log-path",
+        "If set, enable the logging of TPTP-compatible unsatisfiability proof to the file "
+        "specified. The proof will be output only if the formula turned out to be unsat. "
+        "The file at the specified path will be overwritten or newly created if it does not "
+        "exist. ",
+        cxxopts::value<std::string>());
+>>>>>>> 9551d42dc49f19f75967d426478ea58fda8e03ae
     try
     {
         cxxopts::ParseResult result = options.parse(argc, argv);
@@ -51,6 +61,14 @@ int runClient(int argc, char *argv[])
             // file is required!
             std::printf("%s", options.help().c_str());
             return EXIT_FAILURE;
+        }
+        if (result.count("proof-log-path"))
+        {
+            set_config_output_path(result["proof-log-path"].as<std::string>());
+        }
+        else
+        {
+            set_config_output_path("");
         }
         set_config_timeout(result["timeout"].as<unsigned long long>());
         set_config_verbose(result["verbose"].as<bool>());
