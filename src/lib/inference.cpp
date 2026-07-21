@@ -187,11 +187,12 @@ std::vector<Clause> equalityFactoring(const Clause &C)
             // Ordered equality factoring:
             //
             //   C | s = t | u = v
-            // ---------------------  sigma = mgu(s, u), s sigma is < t sigma
+            // ---------------------  sigma = mgu(s, u), t sigma is NOT < s sigma
             // C sigma | s sigma = t sigma | t sigma != v sigma
             //
-            // The first equality is the maximal, oriented equality.  Either
-            // side of the second equality may be the side unified with s.
+            // The first equality is the maximal, oriented equality: s is the
+            // (weakly) larger side, not t.  Either side of the second
+            // equality may be the side unified with s.
             const std::array<std::pair<Term, Term>, 2> firstOrientations = {{
                 {first.left, first.right},
                 {first.right, first.left},
@@ -209,7 +210,7 @@ std::vector<Clause> equalityFactoring(const Clause &C)
                     if (!sigma)
                         continue;
 
-                    if (kboCompare(applySubstitution(*sigma, s), applySubstitution(*sigma, t)) !=
+                    if (kboCompare(applySubstitution(*sigma, s), applySubstitution(*sigma, t)) ==
                         Comparison::Less)
                         continue;
 
