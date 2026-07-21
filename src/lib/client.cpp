@@ -29,6 +29,9 @@ int runClient(int argc, char *argv[])
                           "Set the maximum wall-clock time allowed for the solver to finish, in "
                           "seconds. Setting 0 disables the timeout. Default: 0",
                           cxxopts::value<unsigned long long>()->default_value("0"));
+    options.add_options()("v, verbose",
+                          "Print the parsed signature and input clauses before saturation starts",
+                          cxxopts::value<bool>()->default_value("false"));
     try
     {
         cxxopts::ParseResult result = options.parse(argc, argv);
@@ -50,6 +53,7 @@ int runClient(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         set_config_timeout(result["timeout"].as<unsigned long long>());
+        set_config_verbose(result["verbose"].as<bool>());
     }
     catch (cxxopts::exceptions::exception e)
     {
@@ -62,10 +66,13 @@ int runClient(int argc, char *argv[])
         // STEP 2: parse input file into a formula
         Signature signature;
         std::vector<Clause> formula = parseTPTPCNFFromFile(get_config_file_path(), signature);
-        printSignature(signature);
-        for (const Clause &clause : formula)
+        if (get_config_verbose())
         {
-            printC(clause);
+            printSignature(signature);
+            for (const Clause &clause : formula)
+            {
+                printC(clause);
+            }
         }
         ProofState proof;
         proof.passive = std::move(formula);

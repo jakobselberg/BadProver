@@ -29,3 +29,13 @@ void set_config_timeout(unsigned long long timeout)
 {
     global_config.timeout = timeout;
 }
+
+bool get_config_verbose() noexcept
+{
+    return global_config.verbose;
+}
+
+void set_config_verbose(bool verbose) noexcept
+{
+    global_config.verbose = verbose;
+}
