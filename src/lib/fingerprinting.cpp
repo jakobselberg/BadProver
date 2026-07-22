@@ -46,3 +46,16 @@ Fingerprint computeFingerprint(const Term &t)
         fp.push_back(featureAt(t, pos));
     return fp;
 }
+
+bool featuresCompatible(const Feature &a, const Feature &b)
+{
+    if (a.kind == FeatureKind::Symbol && b.kind == FeatureKind::Symbol)
+        return a.symbol == b.symbol;
+    if (a.kind == FeatureKind::Below &&
+        (b.kind == FeatureKind::Symbol || b.kind == FeatureKind::Star))
+        return false;
+    if (b.kind == FeatureKind::Below &&
+        (a.kind == FeatureKind::Symbol || a.kind == FeatureKind::Star))
+        return false;
+    return true;
+}
