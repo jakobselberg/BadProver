@@ -41,7 +41,7 @@ static bool subsumesHelper(const std::vector<Literal> &aLits, std::size_t idx,
     {
         if (used[j] || cLits[j].positive != aLit.positive)
             continue;
-        for (int swap = 0; swap < (aLit.positive ? 2 : 1); swap++)
+        for (int swap = 0; swap < 2; swap++)
         {
             const Term &pl = swap ? aLit.right : aLit.left;
             const Term &pr = swap ? aLit.left : aLit.right;
