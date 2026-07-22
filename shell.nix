@@ -4,7 +4,10 @@
     rev = "b3d51a0365f6695e7dd5cdf3e180604530ed33b4";
   }) {}
 }:
-
+let
+  python   = pkgs.python313;
+  pyPkgs   = pkgs.python313Packages;
+in
 pkgs.mkShell.override {
   stdenv = pkgs.clangStdenv;
 } {
@@ -23,6 +26,10 @@ pkgs.mkShell.override {
 
     # testing
     pkgs.doctest
+
+    # benchmarking tool dependencies
+    python
+    pyPkgs.matplotlib
   ];
 
   shellHook = ''
