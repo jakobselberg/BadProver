@@ -24,6 +24,7 @@ add_library(atp_lib
     src/lib/simplification.cpp
     src/lib/subsumption.cpp
     src/lib/selection.cpp
+    src/lib/fingerprint.cpp
 
 )
 target_include_directories(atp_lib PUBLIC

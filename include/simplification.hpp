@@ -12,4 +12,4 @@ struct RewriteRule
 using DemodulationIndex = FingerprintIndex<RewriteRule>;
 
 void removeFalseLiterals(Clause &c);
-Clause demodulate(Clause, const std::vector<Clause> &);
+Clause demodulate(Clause, const DemodulationIndex &);

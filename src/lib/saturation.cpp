@@ -61,13 +61,18 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         state.passive[idx] = state.passive.back();
         state.passive.pop_back();
 
-        // 2 Fowrard simplification
-        // 3 Backward simplification
-
-        // 4 Add C to the active set
         state.active.push_back(given);
 
-        // 5 Perform inferences between C and active set
+        if (given.literals.size() == 1)
+        {
+            const Literal &rule = *given.literals.begin();
+            if (rule.positive)
+            {
+                state.demodulationIndex.insert(rule.left, RewriteRule{rule.left, rule.right});
+                state.demodulationIndex.insert(rule.right, RewriteRule{rule.right, rule.left});
+            }
+        }
+
         std::vector<Clause> generated;
 
         auto equalityResolutionResult = equalityResolution(given);
@@ -90,7 +95,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         {
             conclusion.id = state.next_id++;
             removeFalseLiterals(conclusion);
-            conclusion = demodulate(conclusion, state.active);
+            conclusion = demodulate(conclusion, state.demodulationIndex);
             removeFalseLiterals(conclusion);
             bool subsumed = false;
             for (const auto &lit : conclusion.literals)

@@ -1,6 +1,7 @@
 #pragma once
 #include "cnf.hpp"
 #include "inference.hpp"
+#include "simplification.hpp"
 #include "util.hpp"
 #include <cstddef> // for std::size_t
 
@@ -17,6 +18,7 @@ struct ProofState
     std::vector<Clause> passive;
     int next_id;
     std::set<std::set<Literal>> seen;
+    DemodulationIndex demodulationIndex;
 };
 
 // models a contradiction
