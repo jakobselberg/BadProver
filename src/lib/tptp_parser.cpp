@@ -12,7 +12,8 @@ namespace
 // separate implementation so we can keep details inside anonymous namespace
 const Term &tptpTrueImpl()
 {
-    static const Term t = makeFunctionApplication(FunctionSymbol{0, "$true", TermType::Boolean}, {});
+    static const Term t =
+        makeFunctionApplication(FunctionSymbol{0, "$true", TermType::Boolean}, {});
     return t;
 }
 
@@ -527,7 +528,8 @@ std::vector<Clause> parseTPTPCNFFromFile(const std::string &path)
     return p.parseFile();
 }
 
-std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, Signature &signature)
+std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, const std::string &base_dir,
+                                         Signature &signature)
 {
     std::ifstream in(path);
     if (!in)
@@ -537,6 +539,6 @@ std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, Signature &sig
     std::string contents = oss.str();
 
     std::string dir = path.substr(0, path.rfind('/'));
-    Parser p(contents, dir.empty() ? "." : dir, signature);
+    Parser p(contents, base_dir, signature);
     return p.parseFile();
 }

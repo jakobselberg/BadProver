@@ -39,6 +39,11 @@ int runClient(int argc, char *argv[])
         "The file at the specified path will be overwritten or newly created if it does not "
         "exist. ",
         cxxopts::value<std::string>());
+    options.add_options()("b, base_dir",
+                          "Set the base directory for resolving includes in TPTP files. (has to "
+                          "include Axiom folder) Default: inputs",
+                          cxxopts::value<std::string>()->default_value("inputs/TPTP-v9.2.1"));
+
     try
     {
         cxxopts::ParseResult result = options.parse(argc, argv);
@@ -59,6 +64,9 @@ int runClient(int argc, char *argv[])
             std::printf("%s", options.help().c_str());
             return EXIT_FAILURE;
         }
+
+        set_config_base_dir(result["base_dir"].as<std::string>());
+
         if (result.count("proof-log-path"))
         {
             set_config_output_path(result["proof-log-path"].as<std::string>());
@@ -80,7 +88,8 @@ int runClient(int argc, char *argv[])
     std::packaged_task<int()> solver_task([] {
         // STEP 2: parse input file into a formula
         Signature signature;
-        std::vector<Clause> formula = parseTPTPCNFFromFile(get_config_file_path(), signature);
+        std::vector<Clause> formula =
+            parseTPTPCNFFromFile(get_config_file_path(), get_config_base_dir(), signature);
         if (get_config_verbose())
         {
             printSignature(signature);

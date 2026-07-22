@@ -28,4 +28,5 @@ std::vector<Clause> parseTPTPCNF(std::string_view input, Signature &signature);
 
 // read a problem file and parse it
 std::vector<Clause> parseTPTPCNFFromFile(const std::string &path);
-std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, Signature &signature);
+std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, const std::string &base_dir,
+                                         Signature &signature);

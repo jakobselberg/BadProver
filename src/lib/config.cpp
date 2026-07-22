@@ -20,6 +20,16 @@ void set_config_output_path(std::string output_path) noexcept
     global_config.output_path = output_path;
 }
 
+std::string get_config_base_dir() noexcept
+{
+    return global_config.base_dir;
+}
+
+void set_config_base_dir(std::string base_dir) noexcept
+{
+    global_config.base_dir = base_dir;
+}
+
 unsigned long long get_config_timeout() noexcept
 {
     return global_config.timeout;
