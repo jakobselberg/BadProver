@@ -33,7 +33,7 @@ int runClient(int argc, char *argv[])
                           "Print the parsed signature and input clauses before saturation starts",
                           cxxopts::value<bool>()->default_value("false"));
     options.add_options()(
-        "proof-log-path",
+        "p, proof-log-path",
         "If set, enable the logging of TPTP-compatible unsatisfiability proof to the file "
         "specified. The proof will be output only if the formula turned out to be unsat. "
         "The file at the specified path will be overwritten or newly created if it does not "
