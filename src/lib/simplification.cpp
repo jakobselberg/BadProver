@@ -6,58 +6,51 @@
 
 namespace
 {
-static std::optional<Clause> tryDemodulateOnce(const Clause &C, const Term &lhs, const Term &rhs)
+static std::optional<Clause> tryDemodulateOnce(const Clause &C,
+                                               const std::set<Variable> &clauseVars,
+                                               const Literal &lit, int side, const Position &pos,
+                                               const Term &target, const Term &sub,
+                                               const RewriteRule &rule)
 {
-    std::set<Variable> clauseVars = FreeVariables(C);
-    for (const auto &lit : C.literals)
-    {
-        for (int side = 0; side < 2; ++side)
-        {
-            const Term &target = (side == 0) ? lit.left : lit.right;
-            for (const auto &pos : allSubtermPositions(target))
-            {
-                auto sub = getSubtermAt(target, pos);
-                if (!sub)
-                    continue;
-                auto sigma = mgu(lhs, *sub);
-                if (!sigma)
-                    continue;
-                bool bindsClauseVar = false;
-                for (const auto &[v, unused] : *sigma)
-                    if (clauseVars.count(v))
-                    {
-                        bindsClauseVar = true;
-                        break;
-                    }
-                if (bindsClauseVar)
-                    continue;
-                if (!kboGreater(applySubstitution(*sigma, lhs), applySubstitution(*sigma, rhs)))
-                    continue;
-                Term sigmaRhs = applySubstitution(*sigma, rhs);
-                if (!pos.empty() && sigmaRhs == tptpTrue())
-                    continue;
-                auto newTerm = setSubtermAt(target, pos, sigmaRhs);
-                if (!newTerm)
-                    continue;
+    auto sigma = mgu(rule.lhs, sub);
+    if (!sigma)
+        return std::nullopt;
 
-                Literal newLit = lit;
-                if (side == 0)
-                    newLit.left = *newTerm;
-                else
-                    newLit.right = *newTerm;
-                Clause result = {C.id, {}};
-                for (const auto &other : C.literals)
-                {
-                    if (other == lit)
-                        result.literals.insert(applySubstitution(*sigma, newLit));
-                    else
-                        result.literals.insert(applySubstitution(*sigma, other));
-                }
-                return result;
-            }
+    bool bindsClauseVar = false;
+    for (const auto &[v, unused] : *sigma)
+        if (clauseVars.count(v))
+        {
+            bindsClauseVar = true;
+            break;
         }
+    if (bindsClauseVar)
+        return std::nullopt;
+    if (!kboGreater(applySubstitution(*sigma, rule.lhs), applySubstitution(*sigma, rule.rhs)))
+        return std::nullopt;
+
+    Term sigmaRhs = applySubstitution(*sigma, rule.rhs);
+    if (!pos.empty() && sigmaRhs == tptpTrue())
+        return std::nullopt;
+
+    auto newTerm = setSubtermAt(target, pos, sigmaRhs);
+    if (!newTerm)
+        return std::nullopt;
+
+    Literal newLit = lit;
+    if (side == 0)
+        newLit.left = *newTerm;
+    else
+        newLit.right = *newTerm;
+
+    Clause result = {C.id, {}};
+    for (const auto &other : C.literals)
+    {
+        if (other == lit)
+            result.literals.insert(applySubstitution(*sigma, newLit));
+        else
+            result.literals.insert(applySubstitution(*sigma, other));
     }
-    return std::nullopt;
+    return result;
 }
 
 } // namespace
