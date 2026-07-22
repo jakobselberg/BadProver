@@ -1,12 +1,12 @@
-# To DO
+# ToDO
 
-+ Term Types Predicate Vs Variable Type
-+ maintaine unique Clause Id when adding clauses
-+ hookup main to prover logic
 + find larger set of rellevant Problem files
-+ modify parser to load axioms from additional files
 + make prove files
 + simplification rules
++ finish benchmarking script
++ Vapire integration for comparrison???
++ bug hunting
+
 
 # BadProver
 

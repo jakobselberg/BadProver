@@ -1,0 +1,85 @@
+Number of runs: 73
+Individual solver timeout after: 60s
+Overall real runtime: 4322.005s
+Overall CPU runtime: 4320.687s
+Crashes: 0
+Solved but misclassified instances: 0
+Undecided instances: 72
+Solved and correctly classified instances: 1
+
+Undecided instances (out of time or other constrained resources):
+path = inputs/CASC17/HEQ/LCL269-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.007, cpuRuntime = 59.978
+path = inputs/CASC17/HEQ/LCL341-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 60.005
+path = inputs/CASC17/HEQ/CAT002-4.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 59.980
+path = inputs/CASC17/HEQ/HEN011-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.051, cpuRuntime = 60.045
+path = inputs/CASC17/HEQ/COL044-4.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 59.985
+path = inputs/CASC17/HEQ/ANA003-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.007, cpuRuntime = 59.973
+path = inputs/CASC17/HEQ/LAT002-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.006, cpuRuntime = 59.984
+path = inputs/CASC17/HEQ/LCL193-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.018, cpuRuntime = 59.992
+path = inputs/CASC17/HEQ/LAT005-6.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 60.007
+path = inputs/CASC17/HEQ/LCL302-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.008, cpuRuntime = 60.003
+path = inputs/CASC17/HEQ/LCL306-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 60.000
+path = inputs/CASC17/HEQ/COL006-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.004, cpuRuntime = 60.002
+path = inputs/CASC17/HEQ/LCL109-4.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.006, cpuRuntime = 60.003
+path = inputs/CASC17/HEQ/COL044-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 59.996
+path = inputs/CASC17/HNE/SYN312-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 59.998
+path = inputs/CASC17/HNE/LCL394-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.027, cpuRuntime = 60.008
+path = inputs/CASC17/HNE/PLA019-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 59.991
+path = inputs/CASC17/HNE/SYN311-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.006, cpuRuntime = 59.990
+path = inputs/CASC17/HNE/LCL129-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.021, cpuRuntime = 60.008
+path = inputs/CASC17/HNE/LCL122-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.024, cpuRuntime = 59.978
+path = inputs/CASC17/HNE/PLA009-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.013, cpuRuntime = 60.009
+path = inputs/CASC17/HNE/PLA014-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.013, cpuRuntime = 59.990
+path = inputs/CASC17/HNE/LCL020-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.036, cpuRuntime = 60.016
+path = inputs/CASC17/HNE/PLA004-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 59.972
+path = inputs/CASC17/HNE/LCL368-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.025, cpuRuntime = 60.015
+path = inputs/CASC17/HNE/PLA005-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.013, cpuRuntime = 59.998
+path = inputs/CASC17/HNE/PLA012-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 60.001
+path = inputs/CASC17/HNE/LCL123-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.023, cpuRuntime = 60.005
+path = inputs/CASC17/HNE/PLA011-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.013, cpuRuntime = 59.986
+path = inputs/CASC17/NEQ/GEO012-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 60.011
+path = inputs/CASC17/NEQ/GEO060-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.008, cpuRuntime = 59.990
+path = inputs/CASC17/NEQ/GEO066-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 59.992
+path = inputs/CASC17/NEQ/GEO010-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.010, cpuRuntime = 59.998
+path = inputs/CASC17/NEQ/GEO002-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 60.002
+path = inputs/CASC17/NEQ/SET230-6.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.021, cpuRuntime = 60.009
+path = inputs/CASC17/NEQ/GEO001-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 59.989
+path = inputs/CASC17/NEQ/SET497-6.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.030, cpuRuntime = 60.026
+path = inputs/CASC17/NEQ/NUM049-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.023, cpuRuntime = 60.000
+path = inputs/CASC17/NEQ/SET347-6.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.020, cpuRuntime = 60.000
+path = inputs/CASC17/NEQ/MSC007-2.005.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.029, cpuRuntime = 60.024
+path = inputs/CASC17/NEQ/SET454-6.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.021, cpuRuntime = 59.979
+path = inputs/CASC17/NEQ/GEO028-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.020, cpuRuntime = 59.990
+path = inputs/CASC17/NEQ/GEO009-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.013, cpuRuntime = 59.995
+path = inputs/CASC17/NNE/SET013-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 59.981
+path = inputs/CASC17/NNE/SYN067-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.039, cpuRuntime = 60.014
+path = inputs/CASC17/NNE/SET013-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.010, cpuRuntime = 60.007
+path = inputs/CASC17/NNE/SET014-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.015, cpuRuntime = 60.010
+path = inputs/CASC17/NNE/COM003-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.055, cpuRuntime = 60.003
+path = inputs/CASC17/NNE/SYN067-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.030, cpuRuntime = 60.008
+path = inputs/CASC17/NNE/ANA002-3.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.016, cpuRuntime = 60.000
+path = inputs/CASC17/NNE/SET015-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.014, cpuRuntime = 59.998
+path = inputs/CASC17/NNE/SYN067-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.047, cpuRuntime = 60.022
+path = inputs/CASC17/NNE/ANA002-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.021, cpuRuntime = 60.000
+path = inputs/CASC17/NNE/SET012-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.012, cpuRuntime = 59.991
+path = inputs/CASC17/NNE/ANA002-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.029, cpuRuntime = 60.008
+path = inputs/CASC17/NNE/ANA002-4.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.039, cpuRuntime = 60.025
+path = inputs/CASC17/NNE/SET015-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 60.004
+path = inputs/CASC17/PEQ/ALG004-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.095, cpuRuntime = 60.072
+path = inputs/CASC17/PEQ/GRP053-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 60.004
+path = inputs/CASC17/PEQ/GRP055-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 59.998
+path = inputs/CASC17/PEQ/GRP072-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.007, cpuRuntime = 60.004
+path = inputs/CASC17/PEQ/CAT003-2.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.019, cpuRuntime = 59.986
+path = inputs/CASC17/PEQ/GRP086-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.005, cpuRuntime = 59.993
+path = inputs/CASC17/PEQ/GRP051-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 59.989
+path = inputs/CASC17/PEQ/COL075-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.011, cpuRuntime = 59.972
+path = inputs/CASC17/PEQ/GRP052-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.009, cpuRuntime = 59.970
+path = inputs/CASC17/PEQ/LAT015-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.020, cpuRuntime = 59.991
+path = inputs/CASC17/PEQ/COL080-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.007, cpuRuntime = 59.992
+path = inputs/CASC17/PEQ/BOO020-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.008, cpuRuntime = 60.000
+path = inputs/CASC17/PEQ/COL077-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.010, cpuRuntime = 59.997
+path = inputs/CASC17/PEQ/GRP057-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.008, cpuRuntime = 59.985
+path = inputs/CASC17/PEQ/COL078-1.p, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.010, cpuRuntime = 60.006
+
+Solved and correctly classified instances (sorted in descending CPU runtime order):
+path = inputs/CASC17/NEQ/CAT005-3.p, target = Target.UNSAT, result = Result.UNSAT, returnCode = 20, stdout = 'Test nix, clang and cmake \nc UNSATISFIABLE\n', stderr = '', realRuntime = 0.736, cpuRuntime = 0.736
