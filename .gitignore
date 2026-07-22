@@ -67,3 +67,7 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# TPTP
+TPTP-v9.2.1/
+TPTP-*/
