@@ -25,3 +25,24 @@ Feature featureAt(const Term &t, const Position &pos)
 }
 
 } // namespace
+
+const std::vector<Position> &fingerprintSamplePositions()
+{
+    // right now using root, all first three args, and their first 2 children
+    static const std::vector<Position> positions = {
+        {},                                             // root
+        {0},    {1},    {2},                            // first 3 root args
+        {0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}, // their first 2 children
+    };
+    return positions;
+}
+
+Fingerprint computeFingerprint(const Term &t)
+{
+    const auto &positions = fingerprintSamplePositions();
+    Fingerprint fp;
+    fp.reserve(positions.size());
+    for (const auto &pos : positions)
+        fp.push_back(featureAt(t, pos));
+    return fp;
+}
