@@ -62,6 +62,8 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         state.passive.pop_back();
 
         state.active.push_back(given);
+        std::size_t activeIdx = state.active.size() - 1;
+        state.subsumptionIndex.insert(given, activeIdx);
 
         if (given.literals.size() == 1)
         {
@@ -70,6 +72,18 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             {
                 state.demodulationIndex.insert(rule.left, RewriteRule{rule.left, rule.right});
                 state.demodulationIndex.insert(rule.right, RewriteRule{rule.right, rule.left});
+            }
+        }
+
+        for (const auto &lit : given.literals)
+        {
+            for (const Term &side : {lit.left, lit.right})
+                for (const auto &pos : allSubtermPositions(side))
+                    state.subtermIndex.insert(*getSubtermAt(side, pos), activeIdx);
+            if (lit.positive)
+            {
+                state.eqLiteralIndex.insert(lit.left, activeIdx);
+                state.eqLiteralIndex.insert(lit.right, activeIdx);
             }
         }
 
@@ -83,11 +97,30 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         generated.insert(generated.end(), equalityFactoringResult.begin(),
                          equalityFactoringResult.end());
 
-        for (const auto &c : state.active)
+        std::set<std::size_t> asD;
+        for (const auto &lit : given.literals)
         {
-            auto s1 = superposition(given, c);
+            if (!lit.positive)
+                continue;
+            for (const Term &side : {lit.left, lit.right})
+                for (std::size_t c : state.subtermIndex.candidates(side))
+                    asD.insert(c);
+        }
+        for (std::size_t c : asD)
+        {
+            auto s1 = superposition(given, state.active[c]);
             generated.insert(generated.end(), s1.begin(), s1.end());
-            auto s2 = superposition(c, given);
+        }
+
+        std::set<std::size_t> asC;
+        for (const auto &lit : given.literals)
+            for (const Term &side : {lit.left, lit.right})
+                for (const auto &pos : allSubtermPositions(side))
+                    for (std::size_t c : state.eqLiteralIndex.candidates(*getSubtermAt(side, pos)))
+                        asC.insert(c);
+        for (std::size_t c : asC)
+        {
+            auto s2 = superposition(state.active[c], given);
             generated.insert(generated.end(), s2.begin(), s2.end());
         }
 
@@ -107,8 +140,8 @@ SaturationResult saturate(ProofState &state, int max_iteration)
                 return SaturationResult::Unsatisfiable;
             }
 
-            for (const auto &active : state.active)
-                if (subsumes(active, conclusion))
+            for (std::size_t candidateIdx : state.subsumptionIndex.candidates(conclusion))
+                if (subsumes(state.active[candidateIdx], conclusion))
                 {
                     subsumed = true;
                     break;
