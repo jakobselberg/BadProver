@@ -1,6 +1,6 @@
 #pragma once
 #include "cnf.hpp"
-#include "fingerprint.hpp"
+#include "discrimination_tree.hpp"
 #include <vector>
 
 struct RewriteRule
@@ -9,7 +9,7 @@ struct RewriteRule
     Term rhs;
 };
 
-using DemodulationIndex = FingerprintIndex<RewriteRule>;
+using DemodulationIndex = DiscriminationTree<RewriteRule>;
 
 void removeFalseLiterals(Clause &c);
 Clause demodulate(Clause, const DemodulationIndex &);

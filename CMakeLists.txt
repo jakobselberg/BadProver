@@ -24,7 +24,7 @@ add_library(atp_lib
     src/lib/simplification.cpp
     src/lib/subsumption.cpp
     src/lib/selection.cpp
-    src/lib/fingerprint.cpp
+    src/lib/discrimination_tree.cpp
 
 )
 target_include_directories(atp_lib PUBLIC
@@ -59,6 +59,7 @@ add_doctest(terms_test)
 add_doctest(differenttest)
 add_doctest(tptp_parser_test)
 add_doctest(inference_test)
+add_doctest(discrimination_tree_test)
 
 
 # set compiler options to enable more warnings and errors
