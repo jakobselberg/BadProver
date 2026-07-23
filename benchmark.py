@@ -134,7 +134,7 @@ def prettyPrintResults(results: list[RunResult], timeout: int, overallRealRuntim
             pretty += f"{runResultToString(result)}\n"
     return pretty
 # TODO  Vapire integration
-def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int) -> list[str]:
+def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path) -> list[str]:
     match cfg:
         case VampireConfig():
             return ["cadical", "-q", "-t", str(timeout), str(instancePath)]
@@ -142,7 +142,8 @@ def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int) -> list[str]:
             cmd = [
                 "./build/atp",
                 "-t", str(timeout),
-                "-f", str(instancePath)
+                "-f", str(instancePath),
+                "-b", str(base_dir)
             ]
             if cfg.disable_fingerprint_Index is not None and cfg.disable_fingerprint_Index is True:
                 cmd += ["--disable-fingerprint-index"]
@@ -230,6 +231,8 @@ def main():
     )
     parser.add_argument("--config-file", type = Path, default = None, help = "JSON file containing a list of solver configurations.")
     parser.add_argument("--output-dir", type = Path, default = Path("outputs"), help = "Directory where result.txt and result.pdf should be written.")
+    parser.add_argument("-b","--base-dir", type = Path, default = Path("inputs/TPTP-v9.2.1"), help = "Set the base directory for resolving includes in TPTP files. (has to "
+                          "include Axiom folder) Default: inputs")
     args = parser.parse_args()
 
     if args.config == [] and args.config_file is None:
@@ -247,6 +250,7 @@ def main():
     configs = list(dict.fromkeys(configs))
 
     timeout = args.timeout
+    base_dir = args.base_dir
 
     # Prepend build step
     subprocess.run(["./build.sh"], capture_output = False, stdout=subprocess.DEVNULL)
@@ -273,8 +277,8 @@ def main():
 
     results = []
 
-    #jobs = [(HEQInstancePaths, Target.UNSAT), (HNEInstancePaths, Target.UNSAT), (NEQInstancePaths, Target.UNSAT), (NNEInstancePaths, Target.UNSAT), (PEQInstancePaths, Target.UNSAT)]
-    jobs = [(customInstancePaths, Target.UNSAT)]
+    jobs = [(HEQInstancePaths, Target.UNSAT), (HNEInstancePaths, Target.UNSAT), (NEQInstancePaths, Target.UNSAT), (NNEInstancePaths, Target.UNSAT), (PEQInstancePaths, Target.UNSAT)]
+    #jobs = [(customInstancePaths, Target.UNSAT)]
 
     overallTimeBefore = time.perf_counter()
     overallResourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
@@ -284,7 +288,7 @@ def main():
             for instancePath in instancePaths:
                 start = time.perf_counter()
                 resourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
-                cmd = buildCMD(config, instancePath, timeout)
+                cmd = buildCMD(config, instancePath, timeout, base_dir)
                 result = subprocess.run(cmd, capture_output = True, text = True)
                 resourcesAfter = resource.getrusage(resource.RUSAGE_CHILDREN)
                 cpuRuntime = (resourcesAfter.ru_utime - resourcesBefore.ru_utime) + (resourcesAfter.ru_stime - resourcesBefore.ru_stime)
