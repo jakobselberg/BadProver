@@ -25,6 +25,7 @@ add_library(atp_lib
     src/lib/subsumption.cpp
     src/lib/selection.cpp
     src/lib/discrimination_tree.cpp
+    src/lib/feature_vector.cpp
 
 )
 target_include_directories(atp_lib PUBLIC
@@ -60,6 +61,7 @@ add_doctest(differenttest)
 add_doctest(tptp_parser_test)
 add_doctest(inference_test)
 add_doctest(discrimination_tree_test)
+add_doctest(feature_vector_test)
 
 
 # set compiler options to enable more warnings and errors
