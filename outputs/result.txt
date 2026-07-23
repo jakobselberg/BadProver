@@ -1,14 +1,16 @@
-Number of runs: 2
+Number of runs: 4
 Individual solver timeout after: 60s
-Overall real runtime: 72.247s
-Overall CPU runtime: 72.210s
-Crashes: 0
+Overall real runtime: 70.265s
+Overall CPU runtime: 69.107s
+Crashes: 1
 Solved but misclassified instances: 0
-Undecided instances: 1
-Solved and correctly classified instances: 1
+Undecided instances: 0
+Solved and correctly classified instances: 3
 
-Undecided instances (out of time or other constrained resources):
-path = inputs/custom/CAT019-10.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.UNKNOWN, returnCode = 0, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 60.005, cpuRuntime = 59.998
+Crashed instances:
+path = inputs/custom/CAT019-10.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.CRASH, returnCode = -11, stdout = 'Test nix, clang and cmake \nc UNKNOWN\nTimeout reached\n', stderr = '', realRuntime = 61.159, cpuRuntime = 60.003
 
 Solved and correctly classified instances (sorted in descending CPU runtime order):
-path = inputs/custom/ALG002-1.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.UNSAT, returnCode = 20, stdout = 'Test nix, clang and cmake \nc UNSATISFIABLE\n', stderr = '', realRuntime = 12.243, cpuRuntime = 12.211
+path = inputs/custom/ALG002-1.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.UNSAT, returnCode = 20, stdout = 'Test nix, clang and cmake \nc UNSATISFIABLE\n', stderr = '', realRuntime = 9.100, cpuRuntime = 9.099
+path = inputs/custom/Test.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.UNSAT, returnCode = 20, stdout = 'Test nix, clang and cmake \nc UNSATISFIABLE\n', stderr = '', realRuntime = 0.004, cpuRuntime = 0.003
+path = inputs/custom/SimpleTest.p, config = {solver = BadProver}, target = Target.UNSAT, result = Result.UNSAT, returnCode = 20, stdout = 'Test nix, clang and cmake \nc UNSATISFIABLE\n', stderr = '', realRuntime = 0.002, cpuRuntime = 0.002
