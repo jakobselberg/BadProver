@@ -1,10 +1,8 @@
 # ToDO
 
-+ find larger set of rellevant Problem files
 + make prove files
 + simplification rules
 + finish benchmarking script
-+ Vapire integration for comparrison???
 + bug hunting
 + clean up Parser by removing unused old function versions
 + when seting time lower like t = 10 some instances in CASC17 crash with segmentation fault
@@ -71,4 +69,8 @@ see
 ./benchmark.py -h
 ```
 for a detailed description of all options
- 
+
+As an example this call compares the performance of BadProver and Vampire on the easy100 Problem set
+```
+./benchmark.py -t 60 -j easy100 --config-file inputs/PlotConfigs/BadProver-vs-Vampir
+e.json ```

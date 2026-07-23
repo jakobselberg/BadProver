@@ -146,7 +146,7 @@ def prettyPrintResults(results: list[RunResult], timeout: int, overallRealRuntim
         for result in solvedAndCorrectlyClassifiedResults:
             pretty += f"{runResultToString(result)}\n"
     return pretty
-# TODO  Vapire integration
+
 def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path) -> list[str]:
     match cfg:
         case VampireConfig():
