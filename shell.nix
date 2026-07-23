@@ -30,6 +30,9 @@ pkgs.mkShell.override {
     # benchmarking tool dependencies
     python
     pyPkgs.matplotlib
+
+    # vampire
+    vampire
   ];
 
   shellHook = ''

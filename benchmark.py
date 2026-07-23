@@ -29,7 +29,7 @@ class VampireConfig:
 
 @dataclass(frozen=True)
 class SatConfig: 
-    disable_fingerprint_Index: bool | None = None
+    disable_fingerprint_index: bool | None = None
     literal_selection: LiteralSelection | None = None
 
 SolverConfig: TypeAlias = VampireConfig | SatConfig
@@ -42,8 +42,8 @@ def configToString(cfg: SolverConfig) -> str:
             fields = [
                 f"solver = BadProver"
             ]
-            if cfg.disable_fingerprint_Index is not None:
-                fields.append(f"disable_fingerprint_Index = {cfg.disable_fingerprint_Index}")
+            if cfg.disable_fingerprint_index is not None:
+                fields.append(f"disable_fingerprint_index = {cfg.disable_fingerprint_index}")
             if cfg.literal_selection is not None:
                 fields.append(f"literal_selection = {cfg.literal_selection}")
             return ', '.join(fields)
@@ -84,18 +84,31 @@ def runResultToString(res: RunResult) -> str:
     return ', '.join(fields)
 
 def determineResult(returnCode: int, stdout: str) -> Result:
-    # these are the same for cadical and sat
-    EXIT_UNKNOWN = 0
-    EXIT_SAT = 10
-    EXIT_UNSAT = 20
-    if returnCode == EXIT_UNKNOWN:
-        return Result.UNKNOWN
-    elif returnCode == EXIT_SAT:
-        return Result.SAT
-    elif returnCode == EXIT_UNSAT:
+    if "% SZS status Unsatisfiable" in stdout:
         return Result.UNSAT
-    else:
-        return Result.CRASH
+
+    if "% SZS status Satisfiable" in stdout:
+        return Result.SAT
+
+    if "% SZS status CounterSatisfiable" in stdout:
+        return Result.SAT
+
+    if "% SZS status Theorem" in stdout:
+        return Result.UNSAT
+
+    if "% SZS status Timeout" in stdout:
+        return Result.UNKNOWN
+
+    if returnCode == 10:
+        return Result.SAT
+
+    if returnCode == 20:
+        return Result.UNSAT
+
+    if returnCode == 0:
+        return Result.UNKNOWN
+
+    return Result.CRASH
 
 def prettyPrintResults(results: list[RunResult], timeout: int, overallRealRuntime: float, overallCPURuntime: float) -> str:
     numResults = len(results)
@@ -137,7 +150,12 @@ def prettyPrintResults(results: list[RunResult], timeout: int, overallRealRuntim
 def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path) -> list[str]:
     match cfg:
         case VampireConfig():
-            return ["cadical", "-q", "-t", str(timeout), str(instancePath)]
+            return [
+                "vampire",
+                "--mode", "casc",
+                "--time_limit", str(timeout),
+                str(instancePath),
+            ]
         case SatConfig():
             cmd = [
                 "./build/atp",
@@ -145,7 +163,7 @@ def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path
                 "-f", str(instancePath),
                 "-b", str(base_dir)
             ]
-            if cfg.disable_fingerprint_Index is not None and cfg.disable_fingerprint_Index is True:
+            if cfg.disable_fingerprint_index is not None and cfg.disable_fingerprint_index is True:
                 cmd += ["--disable-fingerprint-index"]
             if cfg.literal_selection is not None:   
                 cmd += ["--literal-selection", str(cfg.literal_selection)]
@@ -303,7 +321,13 @@ def main():
                 start = time.perf_counter()
                 resourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
                 cmd = buildCMD(config, instancePath, timeout, base_dir)
-                result = subprocess.run(cmd, capture_output = True, text = True)
+                env = None
+                # Only needed for Vampire.            
+                if isinstance(config, VampireConfig):
+                    env = os.environ.copy()
+                    env["TPTP"] = str(base_dir)
+
+                result = subprocess.run(cmd, capture_output = True, text = True,env =env)
                 resourcesAfter = resource.getrusage(resource.RUSAGE_CHILDREN)
                 cpuRuntime = (resourcesAfter.ru_utime - resourcesBefore.ru_utime) + (resourcesAfter.ru_stime - resourcesBefore.ru_stime)
                 realRuntime = time.perf_counter() - start
