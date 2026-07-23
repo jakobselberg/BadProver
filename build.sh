@@ -8,7 +8,7 @@ CLEAN=0
 while [ $# -gt 0 ]; do
   case "$1" in
     -c|--clean) CLEAN=1 ;;
-    -h|--help) echo "Usage: $0 [--clean] [--test] [--debug].
+    -h|--help) echo "Usage: $0 [--clean].
         '--clean' will perform a clean build."; exit 0 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
