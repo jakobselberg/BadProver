@@ -6,7 +6,7 @@
 + finish benchmarking script
 + Vapire integration for comparrison???
 + bug hunting
-
++ clean up Parser by removing unused old function versions
 
 # BadProver
 
@@ -25,11 +25,27 @@ to build run:
 cmake --build build
 ```
 
+to configure and build run:
+```
+./build.sh
+```
+
+to configure and build run:
+```
+./build.sh --clean
+```
+
 # How to run
 to run the prover run:
 ```
 ./build/atp
 ```
+
+see
+```
+./build/atp -h
+```
+for detailed description of all options
 
 # How to test
 to run all tests run:
@@ -41,3 +57,17 @@ to run one test seperatly run:
 ```
 ./build/TEST_NAME
 ```
+
+# How to benchmark
+to run the benchmark tool an generate cactus plots run:
+```
+./benchmark.py
+```
+By default the results will be saved to the `outputs` folder
+
+see
+```
+./benchmark.py -h
+```
+for a detailed description of all options
+ 
