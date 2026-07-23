@@ -23,10 +23,11 @@ const Term &tptpTrue();
 //
 // Unsupported constructs (fof/tff/thf/include/distinct objects/numbers/...)
 // = everything else triggers a TPTPParseError
+
+// This Function is only used for testing, since it can not handle includes
+// and can not distinguish between Predicates and Functions.
 std::vector<Clause> parseTPTPCNF(std::string_view input);
-std::vector<Clause> parseTPTPCNF(std::string_view input, Signature &signature);
 
 // read a problem file and parse it
-std::vector<Clause> parseTPTPCNFFromFile(const std::string &path);
 std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, const std::string &base_dir,
                                          Signature &signature);
