@@ -212,7 +212,8 @@ def parse_configs_from_json_file(json_path: Path) -> list[SolverConfig]:
 
 Jobs = Literal[
     "CASC17",
-    "custom"
+    "custom",
+    "easy100"
 ]
 
 def main():
@@ -281,12 +282,17 @@ def main():
     customInstancesPath = base / "inputs/custom"
     customInstancePaths = [p.relative_to(base) for p in customInstancesPath.iterdir() if p.is_file()]
 
+    easy100InstancesPath = base / "inputs/easy100"
+    easy100InstancePaths = [p.relative_to(base) for p in easy100InstancesPath.iterdir() if p.is_file()]
+
     results = []
 
     if args.jobs == "CASC17":
         jobs = [(HEQInstancePaths, Target.UNSAT), (HNEInstancePaths, Target.UNSAT), (NEQInstancePaths, Target.UNSAT), (NNEInstancePaths, Target.UNSAT), (PEQInstancePaths, Target.UNSAT)]
     elif args.jobs == "custom":
         jobs = [(customInstancePaths, Target.UNSAT)]
+    elif args.jobs == "easy100":
+        jobs = [(easy100InstancePaths, Target.UNSAT)]
 
     overallTimeBefore = time.perf_counter()
     overallResourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
