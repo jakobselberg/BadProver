@@ -72,4 +72,9 @@ for a detailed description of all options
 As an example this call compares the performance of BadProver and Vampire on the easy100 Problem set
 ```
 ./benchmark.py -t 60 -j easy100 --config-file inputs/PlotConfigs/BadProver-vs-Vampir
-e.json ```
+e.json 
+```
+
+# AI Usage Disclaimer
+AI was used to generate some Tests and was used in the cretion of the Pythonscripts easySelection.py and selectionscript.py.
+Furthermore AI Tools were used for Debugging Purposes
