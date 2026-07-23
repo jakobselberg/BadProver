@@ -18,10 +18,9 @@ int runClient(int argc, char *argv[])
 {
     // STEP 0: grab timestamp at beginning of program
     const auto beginning = std::chrono::steady_clock::now();
-    std::cout << "Test nix, clang and cmake \n";
     // STEP 1: parse command line args
-    cxxopts::Options options("sat", "SAT Solver accepting DIMACS-CNF-formatted input and producing "
-                                    "DIMACS-CNF-formatted output.");
+    cxxopts::Options options("atp",
+                             "automated theorem prover accepting TPTP cnf problemfiles as input.");
 
     options.add_options()("h, help", "Print usage information");
     options.add_options()("f, file", "Path to the input file", cxxopts::value<std::string>());

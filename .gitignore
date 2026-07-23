@@ -71,3 +71,7 @@ Testing/
 # TPTP
 TPTP-v9.2.1/
 TPTP-*/
+
+# Benchmark outputs
+outputs/result.txt
+outputs/result.pdf
