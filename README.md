@@ -7,6 +7,7 @@
 + Vapire integration for comparrison???
 + bug hunting
 + clean up Parser by removing unused old function versions
++ when seting time lower like t = 10 some instances in CASC17 crash with segmentation fault
 
 # BadProver
 

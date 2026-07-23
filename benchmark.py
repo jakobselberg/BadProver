@@ -17,8 +17,8 @@ import textwrap
 import json
 
 
-literalSelection = Literal[
-    "test"
+LiteralSelection = Literal[
+    "test",
     "otherthing"
 ]
 
@@ -30,7 +30,7 @@ class VampireConfig:
 @dataclass(frozen=True)
 class SatConfig: 
     disable_fingerprint_Index: bool | None = None
-    literal_selection: literalSelection | None = None
+    literal_selection: LiteralSelection | None = None
 
 SolverConfig: TypeAlias = VampireConfig | SatConfig
 
@@ -179,8 +179,8 @@ def parse_config_from_json_object(json_obj: object) -> SolverConfig:
             raise ValueError("disable_fingerprint_index needs to be a boolean")
 
         literal_selection = json_obj.get("literal_selection")
-        if literal_selection is not None and literal_selection not in get_args(literalSelection):
-            raise ValueError(f"literal_selection must be one of {get_args(literalSelection)}")
+        if literal_selection is not None and literal_selection not in get_args(LiteralSelection):
+            raise ValueError(f"literal_selection must be one of {get_args(LiteralSelection)}")
             
         return SatConfig(
             disable_fingerprint_index = disable_fingerprint_index,
@@ -210,6 +210,11 @@ def parse_configs_from_json_file(json_path: Path) -> list[SolverConfig]:
 
     return [parse_config_from_json_object(entry) for entry in raw]
 
+Jobs = Literal[
+    "CASC17",
+    "custom"
+]
+
 def main():
     # Configure program arguments
     parser = argparse.ArgumentParser(
@@ -227,12 +232,13 @@ def main():
         "Available options for solver='atp':\n"
         f"  solver ('atp')\n"
         f"  disable_fingerprint_index (boolean)\n"
-        f"  literal_selection (one of {get_args(literalSelection)})\n")
+        f"  literal_selection (one of {get_args(LiteralSelection)})\n")
     )
     parser.add_argument("--config-file", type = Path, default = None, help = "JSON file containing a list of solver configurations.")
     parser.add_argument("--output-dir", type = Path, default = Path("outputs"), help = "Directory where result.txt and result.pdf should be written.")
     parser.add_argument("-b","--base-dir", type = Path, default = Path("inputs/TPTP-v9.2.1"), help = "Set the base directory for resolving includes in TPTP files. (has to "
                           "include Axiom folder) Default: inputs")
+    parser.add_argument("-j","--jobs", type = str, choices = get_args(Jobs), default = "CASC17", help = "Which benchmark jobs to run. Default: CASC17")
     args = parser.parse_args()
 
     if args.config == [] and args.config_file is None:
@@ -277,8 +283,10 @@ def main():
 
     results = []
 
-    jobs = [(HEQInstancePaths, Target.UNSAT), (HNEInstancePaths, Target.UNSAT), (NEQInstancePaths, Target.UNSAT), (NNEInstancePaths, Target.UNSAT), (PEQInstancePaths, Target.UNSAT)]
-    #jobs = [(customInstancePaths, Target.UNSAT)]
+    if args.jobs == "CASC17":
+        jobs = [(HEQInstancePaths, Target.UNSAT), (HNEInstancePaths, Target.UNSAT), (NEQInstancePaths, Target.UNSAT), (NNEInstancePaths, Target.UNSAT), (PEQInstancePaths, Target.UNSAT)]
+    elif args.jobs == "custom":
+        jobs = [(customInstancePaths, Target.UNSAT)]
 
     overallTimeBefore = time.perf_counter()
     overallResourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
