@@ -12,21 +12,10 @@ namespace
 // occurrence to $true" check, since the same term value can legally occur
 // both as a whole literal side and nested elsewhere - that can't be baked
 // into a cache keyed by term value alone.
-static std::optional<Term> tryApplyRule(const std::set<Variable> &clauseVars, const Term &sub,
-                                        const RewriteRule &rule)
+static std::optional<Term> tryApplyRule(const Term &sub, const RewriteRule &rule)
 {
-    auto sigma = mgu(rule.lhs, sub);
+    auto sigma = matchTerm(rule.lhs, sub);
     if (!sigma)
-        return std::nullopt;
-
-    bool bindsClauseVar = false;
-    for (const auto &[v, unused] : *sigma)
-        if (clauseVars.count(v))
-        {
-            bindsClauseVar = true;
-            break;
-        }
-    if (bindsClauseVar)
         return std::nullopt;
     if (!kboGreater(applySubstitution(*sigma, rule.lhs), applySubstitution(*sigma, rule.rhs)))
         return std::nullopt;
@@ -34,10 +23,6 @@ static std::optional<Term> tryApplyRule(const std::set<Variable> &clauseVars, co
     return applySubstitution(*sigma, rule.rhs);
 }
 
-// `bindsClauseVar` above guarantees sigma's domain is always disjoint from
-// clauseVars once accepted, so - unlike the substitution used to compute
-// `replacement` - nothing else in the clause needs any substitution applied
-// to it; the other literals are carried over unchanged.
 static Clause buildRewrittenClause(const Clause &C, const Literal &lit, int side,
                                    const Term &newTerm)
 {
@@ -53,8 +38,7 @@ static Clause buildRewrittenClause(const Clause &C, const Literal &lit, int side
     return result;
 }
 
-std::optional<Clause> tryDemodulateOnce(const Clause &C, const std::set<Variable> &clauseVars,
-                                        const DemodulationIndex &index,
+std::optional<Clause> tryDemodulateOnce(const Clause &C, const DemodulationIndex &index,
                                         std::map<Term, std::optional<Term>> &cache)
 {
     for (const auto &lit : C.literals)
@@ -67,9 +51,8 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const std::set<Variable
                 auto sub = getSubtermAt(target, pos);
                 if (!sub)
                     continue;
-                // rewriting at a variable position can never satisfy bindsClauseVar below,
-                // since sub is always one of C's own free variables here - skip the index
-                // query entirely rather than pay for it and reject it every time
+                // only a rule whose entire lhs is a bare variable could match here,
+                // which never occurs in practice - skip the index query entirely
                 if (std::holds_alternative<Variable>(*sub))
                     continue;
 
@@ -77,9 +60,9 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const std::set<Variable
                 std::optional<Term> &replacement = cacheIt->second;
                 if (inserted)
                 {
-                    for (const auto &rule : index.candidates(*sub))
+                    for (const auto &rule : index.matchCandidates(*sub))
                     {
-                        replacement = tryApplyRule(clauseVars, *sub, rule);
+                        replacement = tryApplyRule(*sub, rule);
                         if (replacement)
                             break;
                     }
@@ -114,18 +97,13 @@ void removeFalseLiterals(Clause &c)
 
 Clause demodulate(Clause C, const DemodulationIndex &index)
 {
-    // Cached across the whole fixpoint: once a subterm is confirmed
-    // rewritable (or confirmed not) it's the same answer on every later
-    // pass, since the index itself never changes mid-call and a subterm's
-    // own free variables - the only thing the answer depends on beyond the
-    // index - are fixed as long as that occurrence still exists in C.
+    // cached across the whole fixpoint loop
     std::map<Term, std::optional<Term>> cache;
     bool changed = true;
     while (changed)
     {
         changed = false;
-        std::set<Variable> clauseVars = FreeVariables(C);
-        if (auto result = tryDemodulateOnce(C, clauseVars, index, cache))
+        if (auto result = tryDemodulateOnce(C, index, cache))
         {
             C = std::move(*result);
             changed = true;
