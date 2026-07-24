@@ -7,11 +7,7 @@
 
 namespace
 {
-// Position-independent: does `rule` rewrite `sub` at all, and to what? The
-// caller is responsible for the position-specific "don't rewrite a nested
-// occurrence to $true" check, since the same term value can legally occur
-// both as a whole literal side and nested elsewhere - that can't be baked
-// into a cache keyed by term value alone.
+
 static std::optional<Term> tryApplyRule(const Term &sub, const RewriteRule &rule)
 {
     auto sigma = matchTerm(rule.lhs, sub);
@@ -51,8 +47,7 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const DemodulationIndex
                 auto sub = getSubtermAt(target, pos);
                 if (!sub)
                     continue;
-                // only a rule whose entire lhs is a bare variable could match here,
-                // which never occurs in practice - skip the index query entirely
+
                 if (std::holds_alternative<Variable>(*sub))
                     continue;
 
