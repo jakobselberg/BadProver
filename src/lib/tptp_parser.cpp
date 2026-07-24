@@ -501,30 +501,11 @@ const Term &tptpTrue()
     return tptpTrueImpl();
 }
 
+// This Function is only used for testing, since it can not handle includes
+// and can not distinguish between Predicates and Functions.
 std::vector<Clause> parseTPTPCNF(std::string_view input)
 {
     Parser p(input);
-    return p.parseFile();
-}
-
-std::vector<Clause> parseTPTPCNF(std::string_view input, Signature &signature)
-{
-    Parser p(input, "", signature);
-    return p.parseFile();
-}
-
-std::vector<Clause> parseTPTPCNFFromFile(const std::string &path)
-{
-    std::ifstream in(path);
-    if (!in)
-        throw TPTPParseError("could not open file: " + path);
-    std::ostringstream oss;
-    oss << in.rdbuf();
-    std::string contents = oss.str();
-
-    std::string dir = path.substr(0, path.rfind('/'));
-    Parser p(contents, dir.empty() ? "." : dir);
-
     return p.parseFile();
 }
 
