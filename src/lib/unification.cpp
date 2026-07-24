@@ -71,3 +71,44 @@ std::optional<Substitution> mgu(const Term &t, const Term &u)
 {
     return mgu(std::vector<std::pair<Term, Term>>{{t, u}});
 }
+
+std::optional<Substitution> matchTerm(const Term &pattern, const Term &target)
+{
+    Substitution sigma;
+    std::vector<std::pair<Term, Term>> worklist{{pattern, target}};
+    while (!worklist.empty())
+    {
+        auto [p, t] = std::move(worklist.back());
+        worklist.pop_back();
+
+        if (termType(p) != termType(t))
+            return std::nullopt;
+
+        if (const auto *pv = std::get_if<Variable>(&p))
+        {
+            auto it = sigma.find(*pv);
+            if (it != sigma.end())
+            {
+                if (it->second != t)
+                    return std::nullopt;
+            }
+            else
+            {
+                sigma[*pv] = t;
+            }
+            continue;
+        }
+
+        if (std::holds_alternative<Variable>(t))
+            return std::nullopt;
+
+        const auto &pf = *std::get<FunctionApplicationRef>(p);
+        const auto &tf = *std::get<FunctionApplicationRef>(t);
+        if (pf.symbol != tf.symbol)
+            return std::nullopt;
+
+        for (std::size_t i = 0; i < pf.arguments.size(); ++i)
+            worklist.emplace_back(pf.arguments[i], tf.arguments[i]);
+    }
+    return sigma;
+}

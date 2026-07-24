@@ -62,6 +62,16 @@ template <class Entry> class DiscriminationTree
         return result;
     }
 
+    // one-directional: entries whose indexed term t satisfies sigma(t) = query
+    // for some sigma, i.e. candidates for matchTerm(t, query)
+    std::vector<Entry> matchCandidates(const Term &query) const
+    {
+        std::vector<Entry> result;
+        auto tokens = linearize(query);
+        collectGeneralisations(&root_, tokens, 0, result);
+        return result;
+    }
+
   private:
     struct Node
     {
@@ -115,6 +125,33 @@ template <class Entry> class DiscriminationTree
         auto starIt = node->children.find(DiscrKey{DiscrKeyKind::Star, {}});
         if (starIt != node->children.end())
             collect(starIt->second.get(), tokens, skipSubtree(tokens, pos), out);
+    }
+
+    static void collectGeneralisations(const Node *node, const std::vector<DiscrKey> &tokens,
+                                       std::size_t pos, std::vector<Entry> &out)
+    {
+        if (pos == tokens.size())
+        {
+            out.insert(out.end(), node->entries.begin(), node->entries.end());
+            return;
+        }
+
+        const DiscrKey &tok = tokens[pos];
+        if (tok.kind == DiscrKeyKind::Star)
+        {
+            auto starIt = node->children.find(DiscrKey{DiscrKeyKind::Star, {}});
+            if (starIt != node->children.end())
+                collectGeneralisations(starIt->second.get(), tokens, pos + 1, out);
+            return;
+        }
+
+        auto appIt = node->children.find(tok);
+        if (appIt != node->children.end())
+            collectGeneralisations(appIt->second.get(), tokens, pos + 1, out);
+
+        auto starIt = node->children.find(DiscrKey{DiscrKeyKind::Star, {}});
+        if (starIt != node->children.end())
+            collectGeneralisations(starIt->second.get(), tokens, skipSubtree(tokens, pos), out);
     }
 
     Node root_;

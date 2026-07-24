@@ -68,6 +68,65 @@ TEST_CASE("query variable matches an indexed compound subtree")
     CHECK(candidates.size() == 1);
 }
 
+TEST_CASE("matchTerm finds one-directional matches")
+{
+    CHECK(matchTerm(F("f", {V("X")}), F("f", {Const("a")})).has_value());
+    CHECK(!matchTerm(F("f", {Const("a")}), F("f", {V("X")})).has_value());
+    CHECK(matchTerm(F("f", {V("X"), V("X")}), F("f", {Const("a"), Const("a")})).has_value());
+    CHECK(!matchTerm(F("f", {V("X"), V("X")}), F("f", {Const("a"), Const("b")})).has_value());
+}
+
+TEST_CASE("matchCandidates only follows the trie's own star child on a query variable")
+{
+    DiscriminationTree<int> index;
+    index.insert(F("f", {Const("a"), Const("b")}), 0);
+    index.insert(F("g", {Const("a")}), 1);
+
+    auto candidates = index.matchCandidates(F("f", {V("X"), Const("b")}));
+    CHECK(candidates.empty());
+}
+
+TEST_CASE("discrimination tree matchCandidates are a superset of the truly matchable terms")
+{
+    std::vector<Term> indexed = {
+        F("f", {Const("a"), Const("b")}),
+        F("f", {V("X"), Const("b")}),
+        F("f", {Const("a"), V("Y")}),
+        F("g", {Const("a")}),
+        V("Z"),
+        F("f", {Const("c"), Const("d"), Const("e")}),
+        F("f", {F("g", {Const("a")}), V("X")}),
+    };
+
+    DiscriminationTree<int> index;
+    for (std::size_t i = 0; i < indexed.size(); ++i)
+        index.insert(indexed[i], static_cast<int>(i));
+
+    std::vector<Term> queries = {
+        F("f", {Const("a"), Const("b")}),
+        F("f", {Const("a"), Const("z")}),
+        F("f", {V("W"), V("V")}),
+        F("g", {Const("a")}),
+        Const("q"),
+        F("f", {Const("c"), Const("d"), Const("e")}),
+        F("f", {V("W"), Const("b")}),
+    };
+
+    for (const auto &query : queries)
+    {
+        std::set<int> trueMatches;
+        for (std::size_t i = 0; i < indexed.size(); ++i)
+            if (matchTerm(indexed[i], query))
+                trueMatches.insert(static_cast<int>(i));
+
+        auto candidates = index.matchCandidates(query);
+        std::set<int> candidateSet(candidates.begin(), candidates.end());
+
+        for (int m : trueMatches)
+            CHECK(candidateSet.count(m) == 1);
+    }
+}
+
 TEST_CASE("discrimination tree candidates are a superset of the truly unifiable terms")
 {
     std::vector<Term> indexed = {
