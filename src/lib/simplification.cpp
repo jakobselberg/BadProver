@@ -67,6 +67,11 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const std::set<Variable
                 auto sub = getSubtermAt(target, pos);
                 if (!sub)
                     continue;
+                // rewriting at a variable position can never satisfy bindsClauseVar below,
+                // since sub is always one of C's own free variables here - skip the index
+                // query entirely rather than pay for it and reject it every time
+                if (std::holds_alternative<Variable>(*sub))
+                    continue;
 
                 auto [cacheIt, inserted] = cache.try_emplace(*sub);
                 std::optional<Term> &replacement = cacheIt->second;
