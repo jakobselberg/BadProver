@@ -3,7 +3,6 @@
 from pathlib import Path
 import shutil
 
-# Change this to your TPTP installation
 TPTP = Path("inputs/TPTP-v9.2.1/Problems/")
 
 OUT = Path("inputs/CASC17")

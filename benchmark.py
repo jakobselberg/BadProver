@@ -152,7 +152,7 @@ def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path
         case VampireConfig():
             return [
                 "vampire",
-                "--mode", "casc",
+                "--mode", "portfolio",
                 "--time_limit", str(timeout),
                 str(instancePath),
             ]
@@ -231,7 +231,12 @@ def parse_configs_from_json_file(json_path: Path) -> list[SolverConfig]:
 Jobs = Literal[
     "CASC17",
     "custom",
-    "easy100"
+    "easy100",
+    "NNE",
+    "HEQ",
+    "HNE",
+    "NEQ",
+    "PEQ"
 ]
 
 def main():
@@ -257,7 +262,7 @@ def main():
     parser.add_argument("--output-dir", type = Path, default = Path("outputs"), help = "Directory where result.txt and result.pdf should be written.")
     parser.add_argument("-b","--base-dir", type = Path, default = Path("inputs/TPTP-v9.2.1"), help = "Set the base directory for resolving includes in TPTP files. (has to "
                           "include Axiom folder) Default: inputs")
-    parser.add_argument("-j","--jobs", type = str, choices = get_args(Jobs), default = "CASC17", help = "Which benchmark jobs to run. Default: CASC17")
+    parser.add_argument("-j","--jobs", type = str, choices = get_args(Jobs), default = "CASC17", help = f"Which benchmark jobs to run. Default: CASC17")
     args = parser.parse_args()
 
     if args.config == [] and args.config_file is None:
@@ -311,11 +316,22 @@ def main():
         jobs = [(customInstancePaths, Target.UNSAT)]
     elif args.jobs == "easy100":
         jobs = [(easy100InstancePaths, Target.UNSAT)]
+    elif args.jobs == "NNE":
+        jobs = [(NNEInstancePaths, Target.UNSAT)]
+    elif args.jobs == "HEQ":
+        jobs = [(HEQInstancePaths, Target.UNSAT)]
+    elif args.jobs == "HNE":
+        jobs = [(HNEInstancePaths, Target.UNSAT)]
+    elif args.jobs == "NEQ":
+        jobs = [(NEQInstancePaths, Target.UNSAT)]  
+    elif args.jobs == "PEQ":
+        jobs = [(PEQInstancePaths, Target.UNSAT)]
 
     overallTimeBefore = time.perf_counter()
     overallResourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
     # collect result data
     for config in configs:
+        print(f"Running benchmark for config: {configToString(config)}")
         for (instancePaths, target) in jobs:
             for instancePath in instancePaths:
                 start = time.perf_counter()
@@ -375,10 +391,9 @@ def main():
     plot_entries = []
     for (config, rs) in solvedWithConfig.items():
         cpuTimes = sorted(result.cpuRuntime for result in rs)
-        accumCpuTimes = list(accumulate(cpuTimes))
-        xs = range(1, len(accumCpuTimes) + 1)
+        xs = range(1, len(cpuTimes) + 1)
         line, = ax.plot(xs,
-                accumCpuTimes,
+                cpuTimes,
                 linewidth = 1,
                 linestyle='-',
                 marker=markerDict[config],
