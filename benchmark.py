@@ -236,7 +236,8 @@ Jobs = Literal[
     "HEQ",
     "HNE",
     "NEQ",
-    "PEQ"
+    "PEQ",
+    "easy100SAT"
 ]
 
 def main():
@@ -308,6 +309,9 @@ def main():
     easy100InstancesPath = base / "inputs/easy100"
     easy100InstancePaths = [p.relative_to(base) for p in easy100InstancesPath.iterdir() if p.is_file()]
 
+    easy100SATInstancesPath = base / "inputs/easy100SAT"
+    easy100SATInstancePaths = [p.relative_to(base) for p in easy100SATInstancesPath.iterdir() if p.is_file()]
+
     results = []
 
     if args.jobs == "CASC17":
@@ -326,6 +330,8 @@ def main():
         jobs = [(NEQInstancePaths, Target.UNSAT)]  
     elif args.jobs == "PEQ":
         jobs = [(PEQInstancePaths, Target.UNSAT)]
+    elif args.jobs == "easy100SAT":
+        jobs = [(easy100SATInstancePaths, Target.SAT)]
 
     overallTimeBefore = time.perf_counter()
     overallResourcesBefore = resource.getrusage(resource.RUSAGE_CHILDREN)
