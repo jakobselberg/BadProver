@@ -49,3 +49,33 @@ void set_config_verbose(bool verbose) noexcept
 {
     global_config.verbose = verbose;
 }
+
+DemodulationIndexKind get_config_demodulation_index() noexcept
+{
+    return global_config.demodulation_index;
+}
+
+void set_config_demodulation_index(DemodulationIndexKind kind) noexcept
+{
+    global_config.demodulation_index = kind;
+}
+
+bool get_config_feature_vector_indexing() noexcept
+{
+    return global_config.feature_vector_indexing;
+}
+
+void set_config_feature_vector_indexing(bool enabled) noexcept
+{
+    global_config.feature_vector_indexing = enabled;
+}
+
+bool get_config_subsumption() noexcept
+{
+    return global_config.subsumption;
+}
+
+void set_config_subsumption(bool enabled) noexcept
+{
+    global_config.subsumption = enabled;
+}

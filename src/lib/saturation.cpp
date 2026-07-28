@@ -1,3 +1,4 @@
+#include "config.hpp"
 #include "saturation.hpp"
 #include "selection.hpp"
 #include "simplification.hpp"
@@ -13,12 +14,14 @@ bool isEmptyClause(const Clause &c)
 namespace
 {
 
+// make the ids of all variables in a given clause c unique within the current process
+// to avoid accidental name collisions between variables
 static Clause canonicalize(const Clause &c)
 {
     std::map<std::string, std::string> mapping;
     int count = 0;
 
-    std::function<Term(const Term &)> canonTerm = [&](const Term &t) -> Term {
+    std::function<Term(const Term &)> canonicalTerm = [&](const Term &t) -> Term {
         if (auto *v = std::get_if<Variable>(&t))
         {
             auto &mapped = mapping[v->name];
@@ -30,14 +33,15 @@ static Clause canonicalize(const Clause &c)
         std::vector<Term> args;
         for (const auto &arg : f.arguments)
         {
-            args.push_back(canonTerm(arg));
+            args.push_back(canonicalTerm(arg));
         }
         return makeFunctionApplication(f.symbol, std::move(args));
     };
 
     Clause result{c.id, {}};
     for (const auto &lit : c.literals)
-        result.literals.insert(Literal{canonTerm(lit.left), canonTerm(lit.right), lit.positive});
+        result.literals.insert(
+            Literal{canonicalTerm(lit.left), canonicalTerm(lit.right), lit.positive});
     return result;
 }
 
@@ -63,7 +67,8 @@ SaturationResult saturate(ProofState &state, int max_iteration)
 
         state.active.push_back(given);
         std::size_t activeIdx = state.active.size() - 1;
-        state.subsumptionIndex.insert(given, activeIdx);
+        if (get_config_subsumption())
+            state.subsumptionIndex.insert(given, activeIdx);
 
         if (given.literals.size() == 1)
         {
@@ -140,14 +145,17 @@ SaturationResult saturate(ProofState &state, int max_iteration)
                 return SaturationResult::Unsatisfiable;
             }
 
-            for (std::size_t candidateIdx : state.subsumptionIndex.candidates(conclusion))
-                if (subsumes(state.active[candidateIdx], conclusion))
-                {
-                    subsumed = true;
-                    break;
-                }
-            if (subsumed)
-                continue;
+            if (get_config_subsumption())
+            {
+                for (std::size_t candidateIdx : state.subsumptionIndex.candidates(conclusion))
+                    if (subsumes(state.active[candidateIdx], conclusion))
+                    {
+                        subsumed = true;
+                        break;
+                    }
+                if (subsumed)
+                    continue;
+            }
 
             if (state.seen.insert(canonicalize(conclusion).literals).second)
                 state.passive.push_back(conclusion);

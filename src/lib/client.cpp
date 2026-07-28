@@ -42,6 +42,20 @@ int runClient(int argc, char *argv[])
                           "Set the base directory for resolving includes in TPTP files. (has to "
                           "include Axiom folder) Default: inputs",
                           cxxopts::value<std::string>()->default_value("inputs/TPTP-v9.2.1"));
+    options.add_options()(
+        "demodulation-index",
+        "Index used to look up demodulation rewrite rules: none, fingerprint, or tree. "
+        "Default: tree",
+        cxxopts::value<std::string>()->default_value("tree"));
+    options.add_options()(
+        "feature-vector-indexing",
+        "Use feature vector indexing for subsumption candidate lookup instead of a linear "
+        "scan. Default: true",
+        cxxopts::value<bool>()->default_value("true"));
+    options.add_options()("subsumption",
+                          "Eliminate clauses subsumed by an active clause. Disabling this keeps "
+                          "redundant clauses around. Default: true",
+                          cxxopts::value<bool>()->default_value("true"));
 
     try
     {
@@ -76,6 +90,22 @@ int runClient(int argc, char *argv[])
         }
         set_config_timeout(result["timeout"].as<unsigned long long>());
         set_config_verbose(result["verbose"].as<bool>());
+
+        std::string demodulationIndex = result["demodulation-index"].as<std::string>();
+        if (demodulationIndex == "none")
+            set_config_demodulation_index(DemodulationIndexKind::None);
+        else if (demodulationIndex == "fingerprint")
+            set_config_demodulation_index(DemodulationIndexKind::Fingerprint);
+        else if (demodulationIndex == "tree")
+            set_config_demodulation_index(DemodulationIndexKind::DiscriminationTree);
+        else
+        {
+            std::cerr << "Error: invalid value for --demodulation-index: " << demodulationIndex
+                      << std::endl;
+            return EXIT_FAILURE;
+        }
+        set_config_feature_vector_indexing(result["feature-vector-indexing"].as<bool>());
+        set_config_subsumption(result["subsumption"].as<bool>());
     }
     catch (cxxopts::exceptions::exception e)
     {
@@ -137,11 +167,18 @@ int runClient(int argc, char *argv[])
     {
         // if timeout is disabled, wait indefinitely until Prover is finished
         solver_future.wait();
-        // redeem future to get return value
-        int result = solver_future.get();
         // wait until the worker has properly terminated
         solver_worker.join();
-        return result;
+        try
+        {
+            // redeem future to get return value; rethrows any exception the solver threw
+            return solver_future.get();
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
     }
     else
     {
@@ -150,11 +187,18 @@ int runClient(int argc, char *argv[])
         if ((solver_future.wait_until(deadline) == std::future_status::ready))
         {
             // Prover finished in time: return the exit value of the worker thread
-            // redeem future to get return value
-            int result = solver_future.get();
             // wait until the worker has properly terminated
             solver_worker.join();
-            return result;
+            try
+            {
+                // redeem future to get return value; rethrows any exception the solver threw
+                return solver_future.get();
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Error: " << e.what() << std::endl;
+                return EXIT_FAILURE;
+            }
         }
         else
         {

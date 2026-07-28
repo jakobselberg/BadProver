@@ -81,6 +81,32 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const DemodulationIndex
 
 } // namespace
 
+DemodulationIndex::DemodulationIndex(DemodulationIndexKind kind)
+{
+    switch (kind)
+    {
+    case DemodulationIndexKind::None:
+        impl_ = LinearIndex<Term, RewriteRule>{};
+        break;
+    case DemodulationIndexKind::Fingerprint:
+        impl_ = FingerprintIndex<RewriteRule>{};
+        break;
+    case DemodulationIndexKind::DiscriminationTree:
+        impl_ = DiscriminationTree<RewriteRule>{};
+        break;
+    }
+}
+
+void DemodulationIndex::insert(const Term &t, RewriteRule rule)
+{
+    std::visit([&](auto &idx) { idx.insert(t, std::move(rule)); }, impl_);
+}
+
+std::vector<RewriteRule> DemodulationIndex::matchCandidates(const Term &query) const
+{
+    return std::visit([&](const auto &idx) { return idx.matchCandidates(query); }, impl_);
+}
+
 void removeFalseLiterals(Clause &c)
 {
     std::set<Literal> kept;

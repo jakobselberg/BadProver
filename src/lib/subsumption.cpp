@@ -62,6 +62,24 @@ static bool subsumesHelper(const std::vector<Literal> &aLits, std::size_t idx,
 
 } // namespace
 
+SubsumptionIndex::SubsumptionIndex(bool useFeatureVectorIndex)
+{
+    if (useFeatureVectorIndex)
+        impl_ = FeatureVectorIndex<std::size_t>{};
+    else
+        impl_ = LinearIndex<Clause, std::size_t>{};
+}
+
+void SubsumptionIndex::insert(const Clause &c, std::size_t entry)
+{
+    std::visit([&](auto &idx) { idx.insert(c, entry); }, impl_);
+}
+
+std::vector<std::size_t> SubsumptionIndex::candidates(const Clause &c) const
+{
+    return std::visit([&](const auto &idx) { return idx.candidates(c); }, impl_);
+}
+
 bool subsumes(const Clause &A, const Clause &C)
 {
     if (A.literals.size() > C.literals.size())
