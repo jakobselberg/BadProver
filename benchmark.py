@@ -421,7 +421,7 @@ def main():
         plot_entries.append((line, textwrap.fill(configToString(config), width = 35)))
 
     ax.set_xlabel("number of solved instances")
-    ax.set_ylabel("cumulative CPU time (s)")
+    ax.set_ylabel("CPU time (s)")
     ax.grid(True, alpha=0.3)
 
     handles = [line for line, _ in plot_entries]

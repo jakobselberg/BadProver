@@ -1,0 +1,5 @@
+[
+    { "solver": "atp", "demodulation_index": "tree" },
+    { "solver": "atp", "demodulation_index": "none" },
+    { "solver": "atp", "demodulation_index":"fingerprint"}
+]
