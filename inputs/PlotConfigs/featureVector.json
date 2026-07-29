@@ -1,0 +1,4 @@
+[
+    { "solver": "atp", "disable_feature_vector_indexing": true },
+    { "solver": "atp", "disable_feature_vector_indexing": false }
+]

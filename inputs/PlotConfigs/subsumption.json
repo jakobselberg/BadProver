@@ -1,0 +1,4 @@
+[
+    { "solver": "atp", "disable_subsumption": true },
+    { "solver": "atp", "disable_subsumption": false }
+]

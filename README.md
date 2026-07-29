@@ -1,10 +1,10 @@
 # ToDO
 
 + make prove files
-+ simplification rules
-+ finish benchmarking script
 + bug hunting
 + when seting time lower like t = 10 some instances in CASC17 crash with segmentation fault
++ add config in benchmarking via commandline
++ some instances crash with fingerprint
 
 # BadProver
 

@@ -48,14 +48,14 @@ int runClient(int argc, char *argv[])
         "Default: tree",
         cxxopts::value<std::string>()->default_value("tree"));
     options.add_options()(
-        "feature-vector-indexing",
+        "disable-feature-vector-indexing",
         "Use feature vector indexing for subsumption candidate lookup instead of a linear "
         "scan. Default: true",
-        cxxopts::value<bool>()->default_value("true"));
-    options.add_options()("subsumption",
+        cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
+    options.add_options()("disable-subsumption",
                           "Eliminate clauses subsumed by an active clause. Disabling this keeps "
                           "redundant clauses around. Default: true",
-                          cxxopts::value<bool>()->default_value("true"));
+                          cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
 
     try
     {
@@ -104,8 +104,10 @@ int runClient(int argc, char *argv[])
                       << std::endl;
             return EXIT_FAILURE;
         }
-        set_config_feature_vector_indexing(result["feature-vector-indexing"].as<bool>());
-        set_config_subsumption(result["subsumption"].as<bool>());
+        set_config_feature_vector_indexing(!result["disable-feature-vector-indexing"].as<bool>());
+        set_config_subsumption(!result["disable-subsumption"].as<bool>());
+        std::cout << ((get_config_subsumption())) << '\n';
+        std::cout << ((get_config_feature_vector_indexing())) << '\n';
     }
     catch (cxxopts::exceptions::exception e)
     {

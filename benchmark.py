@@ -31,8 +31,8 @@ class VampireConfig:
 @dataclass(frozen=True)
 class SatConfig:
     demodulation_index: DemodulationIndex | None = None
-    feature_vector_indexing: bool | None = None
-    subsumption: bool | None = None
+    disable_feature_vector_indexing: bool | None = None
+    disable_subsumption: bool | None = None
 
 SolverConfig: TypeAlias = VampireConfig | SatConfig
 
@@ -46,10 +46,10 @@ def configToString(cfg: SolverConfig) -> str:
             ]
             if cfg.demodulation_index is not None:
                 fields.append(f"demodulation_index = {cfg.demodulation_index}")
-            if cfg.feature_vector_indexing is not None:
-                fields.append(f"feature_vector_indexing = {cfg.feature_vector_indexing}")
-            if cfg.subsumption is not None:
-                fields.append(f"subsumption = {cfg.subsumption}")
+            if cfg.disable_feature_vector_indexing is not None:
+                fields.append(f"disable_feature_vector_indexing = {cfg.disable_feature_vector_indexing}")
+            if cfg.disable_subsumption is not None:
+                fields.append(f"disable_subsumption = {cfg.disable_subsumption}")
             return ', '.join(fields)
 
 class Target(Enum):
@@ -169,10 +169,10 @@ def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path
             ]
             if cfg.demodulation_index is not None:
                 cmd += ["--demodulation-index", str(cfg.demodulation_index)]
-            if cfg.feature_vector_indexing is not None:
-                cmd += ["--feature-vector-indexing", str(cfg.feature_vector_indexing).lower()]
-            if cfg.subsumption is not None:
-                cmd += ["--subsumption", str(cfg.subsumption).lower()]
+            if cfg.disable_feature_vector_indexing is not None and cfg.disable_feature_vector_indexing is True:
+                cmd += ["--disable-feature-vector-indexing"]
+            if cfg.disable_subsumption is not None and cfg.disable_subsumption is True:
+                cmd += ["--disable-subsumption"]
 
             return cmd
 
@@ -202,18 +202,18 @@ def parse_config_from_json_object(json_obj: object) -> SolverConfig:
         if demodulation_index is not None and demodulation_index not in get_args(DemodulationIndex):
             raise ValueError(f"demodulation_index must be one of {get_args(DemodulationIndex)}")
 
-        feature_vector_indexing = json_obj.get("feature_vector_indexing")
-        if feature_vector_indexing is not None and type(feature_vector_indexing) is not bool:
-            raise ValueError("feature_vector_indexing needs to be a boolean")
+        disable_feature_vector_indexing = json_obj.get("disable_feature_vector_indexing")
+        if disable_feature_vector_indexing is not None and type(disable_feature_vector_indexing) is not bool:
+            raise ValueError("disable_feature_vector_indexing needs to be a boolean")
 
-        subsumption = json_obj.get("subsumption")
-        if subsumption is not None and type(subsumption) is not bool:
-            raise ValueError("subsumption needs to be a boolean")
+        disable_subsumption = json_obj.get("disable_subsumption")
+        if disable_subsumption is not None and type(disable_subsumption) is not bool:
+            raise ValueError("disable_subsumption needs to be a boolean")
 
         return SatConfig(
             demodulation_index = demodulation_index,
-            feature_vector_indexing = feature_vector_indexing,
-            subsumption = subsumption,)
+            disable_feature_vector_indexing = disable_feature_vector_indexing,
+            disable_subsumption = disable_subsumption,)
     else:
         raise ValueError(f"parse_config_from_json_object: unkown solver kind: {solver}")
 
@@ -268,8 +268,8 @@ def main():
         "Available options for solver='atp':\n"
         f"  solver ('atp')\n"
         f"  demodulation_index (one of {get_args(DemodulationIndex)})\n"
-        f"  feature_vector_indexing (boolean)\n"
-        f"  subsumption (boolean)\n")
+        f"  disable_feature_vector_indexing (boolean)\n"
+        f"  disable_subsumption (boolean)\n")
     )
     parser.add_argument("--config-file", type = Path, default = None, help = "JSON file containing a list of solver configurations.")
     parser.add_argument("--output-dir", type = Path, default = Path("outputs"), help = "Directory where result.txt and result.pdf should be written.")
