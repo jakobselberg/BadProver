@@ -106,8 +106,6 @@ int runClient(int argc, char *argv[])
         }
         set_config_feature_vector_indexing(!result["disable-feature-vector-indexing"].as<bool>());
         set_config_subsumption(!result["disable-subsumption"].as<bool>());
-        std::cout << ((get_config_subsumption())) << '\n';
-        std::cout << ((get_config_feature_vector_indexing())) << '\n';
     }
     catch (cxxopts::exceptions::exception e)
     {
