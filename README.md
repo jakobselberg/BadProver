@@ -3,14 +3,37 @@
 + make prove files
 + bug hunting
 + when seting time lower like t = 10 some instances in CASC17 crash with segmentation fault
-+ add config in benchmarking via commandline
 + some instances crash with fingerprint
 
 # BadProver
 
-superposition prover
+Is a simple superposition automated theorem prover.
+The core proving concepts are based on the material coverd in praktikum automatd theorem provers SOSE 2026 at lmu munich.
+The prover takes tptp problem files as inputs and outputs UNSATISFIABLE, SATURATED or UNKNOWN in case of a timeout.
+The prover is designed to work on untyped problems in cnf.
+
+# System requirements 
 requires c++ version 20+
 
+To run `atp`, you need the following software installed and configured:
+- `clang` C/C++ compiler
+- `clang-tools` C/C++ compiler tools
+- `cmake` build system
+- `ninja` build system
+- `cxxopts` C++ library
+
+Evaluating the builtin tests additionally requires:
+- `doctest` C++ library
+
+Using the benchmark tool to generate cactus plots additionally requires:
+- `python` interpreter
+- `matplotlib` python library
+
+The benchmark tool supports comparing the `BadProver` automated theorem prover with `vampire`. This additionally requires:
+- `vampire`
+
+If you want the setup to be as simple and reproducible as possible, install the package manager Nix ([https://nixos.org/download/](https://nixos.org/download/)), navigate the shell into the repo directory and issue `nix-shell` - this will generate a shell environment with all the dependencies exactly as listed above, so it is as close as possible to 'guaranteed working'.
+Be warned that on the first invocation of `nix-shell`, the process can take a while (<= 30 minutes) to finish.
 
 # How to build
 to configure build process run:
@@ -28,7 +51,7 @@ to configure and build run:
 ./build.sh
 ```
 
-to configure and build run:
+to rebuild the build folder and buid run:
 ```
 ./build.sh --clean
 ```
@@ -69,12 +92,16 @@ see
 ```
 for a detailed description of all options
 
-As an example this call compares the performance of BadProver and Vampire on the easy100 Problem set
+As an example this call compares the performance of BadProver and Vampire on the easy100 Problem set with 60 seconds per problem.
 ```
 ./benchmark.py -t 60 -j easy100 --config-file inputs/PlotConfigs/BadProver-vs-Vampir
 e.json 
 ```
 
+The results of our own analysis are saved in outputs/Plots. They were created using the solver configurations stored as .json files in inputs/PlotConfigs.
+The Problemsets our analysis is based on were created by using the selection scripts easySelection.py, easySelectionSAT.py and selectionscript.py.
+Each of them just copie problems out of the TPTP problem set.
+
 # AI Usage Disclaimer
-AI was used to generate some Tests and was used in the cretion of the Pythonscripts easySelection.py and selectionscript.py.
-Furthermore AI Tools were used for Debugging Purposes
+AI was used to generate some Tests and was used in the cretion of the Pythonscripts easySelection.py, easySelectionSAT.py and selectionscript.py.
+Furthermore AI Tools were used for Debugging Purposes.
