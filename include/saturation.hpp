@@ -5,6 +5,7 @@
 #include "simplification.hpp"
 #include "subsumption.hpp"
 #include "util.hpp"
+#include <climits>
 #include <cstddef> // for std::size_t
 
 enum class SaturationResult
@@ -29,4 +30,4 @@ struct ProofState
 // models a contradiction
 bool isEmptyClause(const Clause &c);
 
-SaturationResult saturate(ProofState &state, int max_iteration = 10000);
+SaturationResult saturate(ProofState &state, int max_iteration = INT_MAX);
