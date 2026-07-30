@@ -33,6 +33,7 @@ class SatConfig:
     demodulation_index: DemodulationIndex | None = None
     disable_feature_vector_indexing: bool | None = None
     disable_subsumption: bool | None = None
+    disable_superposition_indexing: bool | None = None
 
 SolverConfig: TypeAlias = VampireConfig | SatConfig
 
@@ -50,6 +51,8 @@ def configToString(cfg: SolverConfig) -> str:
                 fields.append(f"disable_feature_vector_indexing = {cfg.disable_feature_vector_indexing}")
             if cfg.disable_subsumption is not None:
                 fields.append(f"disable_subsumption = {cfg.disable_subsumption}")
+            if cfg.disable_superposition_indexing is not None:
+                fields.append(f"disable_superposition_indexing = {cfg.disable_superposition_indexing}")
             return ', '.join(fields)
 
 class Target(Enum):
@@ -173,6 +176,8 @@ def buildCMD(cfg: SolverConfig, instancePath: Path, timeout: int, base_dir: Path
                 cmd += ["--disable-feature-vector-indexing"]
             if cfg.disable_subsumption is not None and cfg.disable_subsumption is True:
                 cmd += ["--disable-subsumption"]
+            if cfg.disable_superposition_indexing is not None and cfg.disable_superposition_indexing is True:
+                cmd += ["--disable-superposition-indexing"]
 
             return cmd
 
@@ -210,10 +215,15 @@ def parse_config_from_json_object(json_obj: object) -> SolverConfig:
         if disable_subsumption is not None and type(disable_subsumption) is not bool:
             raise ValueError("disable_subsumption needs to be a boolean")
 
+        disable_superposition_indexing = json_obj.get("disable_superposition_indexing")
+        if disable_superposition_indexing is not None and type(disable_superposition_indexing) is not bool:
+            raise ValueError("disable_superposition_indexing needs to be a boolean")
+
         return SatConfig(
             demodulation_index = demodulation_index,
             disable_feature_vector_indexing = disable_feature_vector_indexing,
-            disable_subsumption = disable_subsumption,)
+            disable_subsumption = disable_subsumption,
+            disable_superposition_indexing = disable_superposition_indexing,)
     else:
         raise ValueError(f"parse_config_from_json_object: unkown solver kind: {solver}")
 
@@ -270,7 +280,8 @@ def main():
         f"  demodulation_index (one of {get_args(DemodulationIndex)})\n"
         f"  disable_feature_vector_indexing (boolean)\n"
         f"  disable_subsumption (boolean)\n"
-        "Example: --config '{ \"solver\": \"atp\"," 
+        f"  disable_superposition_indexing (boolean)\n"
+        "Example: --config '{ \"solver\": \"atp\","
         "\"disable_subsumption\": true }'")
     )
     parser.add_argument("--config-file", type = Path, default = None, help = "JSON file containing a list of solver configurations.")

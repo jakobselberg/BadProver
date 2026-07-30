@@ -27,6 +27,7 @@ add_library(atp_lib
     src/lib/discrimination_tree.cpp
     src/lib/feature_vector.cpp
     src/lib/fingerprint.cpp
+    src/lib/superposition_index.cpp
 
 )
 target_include_directories(atp_lib PUBLIC

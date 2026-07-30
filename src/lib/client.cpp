@@ -56,6 +56,11 @@ int runClient(int argc, char *argv[])
                           "Eliminate clauses subsumed by an active clause. Disabling this keeps "
                           "redundant clauses around. Default: enabled",
                           cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
+    options.add_options()(
+        "disable-superposition-indexing",
+        "Use a discrimination tree to look up superposition candidates instead of a linear "
+        "scan. Default: enabled",
+        cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
 
     try
     {
@@ -106,6 +111,7 @@ int runClient(int argc, char *argv[])
         }
         set_config_feature_vector_indexing(!result["disable-feature-vector-indexing"].as<bool>());
         set_config_subsumption(!result["disable-subsumption"].as<bool>());
+        set_config_superposition_indexing(!result["disable-superposition-indexing"].as<bool>());
     }
     catch (cxxopts::exceptions::exception e)
     {

@@ -1,9 +1,9 @@
 #pragma once
 #include "cnf.hpp"
-#include "discrimination_tree.hpp"
 #include "inference.hpp"
 #include "simplification.hpp"
 #include "subsumption.hpp"
+#include "superposition_index.hpp"
 #include "util.hpp"
 #include <climits>
 #include <cstddef> // for std::size_t
@@ -23,8 +23,8 @@ struct ProofState
     std::set<std::set<Literal>> seen;
     DemodulationIndex demodulationIndex;
     SubsumptionIndex subsumptionIndex;
-    DiscriminationTree<std::size_t> subtermIndex;
-    DiscriminationTree<std::size_t> eqLiteralIndex;
+    SuperpositionIndex subtermIndex;
+    SuperpositionIndex eqLiteralIndex;
 };
 
 // models a contradiction

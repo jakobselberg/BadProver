@@ -79,3 +79,13 @@ void set_config_subsumption(bool enabled) noexcept
 {
     global_config.subsumption = enabled;
 }
+
+bool get_config_superposition_indexing() noexcept
+{
+    return global_config.superposition_indexing;
+}
+
+void set_config_superposition_indexing(bool enabled) noexcept
+{
+    global_config.superposition_indexing = enabled;
+}
