@@ -2,7 +2,7 @@
 
 from pathlib import Path
 import shutil
-
+# This script copies the problems used in the CASC17 competition from the TPTP library to a separate folder for easier access.
 TPTP = Path("inputs/TPTP-v9.2.1/Problems/")
 
 OUT = Path("inputs/CASC17")

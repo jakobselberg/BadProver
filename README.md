@@ -2,7 +2,6 @@
 
 + make prove files
 + bug hunting
-+ when seting time lower like t = 10 some instances in CASC17 crash with segmentation fault
 + some instances crash with fingerprint
 
 # BadProver
