@@ -31,16 +31,16 @@ int runClient(int argc, char *argv[])
     options.add_options()("v, verbose",
                           "Print the parsed signature and input clauses before saturation starts",
                           cxxopts::value<bool>()->default_value("false"));
-    options.add_options()(
+    /*options.add_options()(
         "p, proof-log-path",
         "If set, enable the logging of TPTP-compatible unsatisfiability proof to the file "
         "specified. The proof will be output only if the formula turned out to be unsat. "
         "The file at the specified path will be overwritten or newly created if it does not "
         "exist. ",
-        cxxopts::value<std::string>());
+        cxxopts::value<std::string>());*/
     options.add_options()("b, base_dir",
                           "Set the base directory for resolving includes in TPTP files. (has to "
-                          "include Axiom folder) Default: inputs",
+                          "include Axiom folder) Default: inputs/TPTP-v9.2.1",
                           cxxopts::value<std::string>()->default_value("inputs/TPTP-v9.2.1"));
     options.add_options()(
         "demodulation-index",
@@ -50,11 +50,11 @@ int runClient(int argc, char *argv[])
     options.add_options()(
         "disable-feature-vector-indexing",
         "Use feature vector indexing for subsumption candidate lookup instead of a linear "
-        "scan. Default: true",
+        "scan. Default: enabled",
         cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
     options.add_options()("disable-subsumption",
                           "Eliminate clauses subsumed by an active clause. Disabling this keeps "
-                          "redundant clauses around. Default: true",
+                          "redundant clauses around. Default: enabled",
                           cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
 
     try
@@ -142,7 +142,7 @@ int runClient(int argc, char *argv[])
         }
         else if (result == SaturationResult::Saturated)
         {
-            std::cout << "c Saturated" << std::endl;
+            std::cout << "c SATURATED" << std::endl;
             return EXIT_SAT;
         }
         else

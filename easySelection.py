@@ -97,11 +97,11 @@ def choose(groups, n=100):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="copies a number of easy(rating < 0.5) unsat, untyped, cnf problems from the TPTP library to a specified output directory.")
 
-    parser.add_argument("--tptp", default=Path("inputs/TPTP-v9.2.1/Problems/"),type=Path)
-    parser.add_argument("--output",  default=Path("inputs/easy100"),type=Path)
-    parser.add_argument("-n", "--number", default=100, type=int)
+    parser.add_argument("--tptp", default=Path("inputs/TPTP-v9.2.1/Problems/"),type=Path, help="Path to the TPTP problem library.")
+    parser.add_argument("--output",  default=Path("inputs/easy100"),type=Path, help="Path to the output directory.")
+    parser.add_argument("-n", "--number", default=100, type=int, help="Number of problems to select.")
 
     args = parser.parse_args()
 

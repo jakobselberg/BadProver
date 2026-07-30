@@ -269,13 +269,15 @@ def main():
         f"  solver ('atp')\n"
         f"  demodulation_index (one of {get_args(DemodulationIndex)})\n"
         f"  disable_feature_vector_indexing (boolean)\n"
-        f"  disable_subsumption (boolean)\n")
+        f"  disable_subsumption (boolean)\n"
+        "Example: --config '{ \"solver\": \"atp\"," 
+        "\"disable_subsumption\": true }'")
     )
     parser.add_argument("--config-file", type = Path, default = None, help = "JSON file containing a list of solver configurations.")
     parser.add_argument("--output-dir", type = Path, default = Path("outputs"), help = "Directory where result.txt and result.pdf should be written.")
     parser.add_argument("-b","--base-dir", type = Path, default = Path("inputs/TPTP-v9.2.1"), help = "Set the base directory for resolving includes in TPTP files. (has to "
                           "include Axiom folder) Default: inputs")
-    parser.add_argument("-j","--jobs", type = str, choices = get_args(Jobs), default = "CASC17", help = f"Which benchmark jobs to run. Default: CASC17")
+    parser.add_argument("-j","--jobs", type = str, choices = get_args(Jobs), default = "easy100", help = f"Which benchmark jobs to run. Default: easy100")
     args = parser.parse_args()
 
     if args.config == [] and args.config_file is None:
