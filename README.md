@@ -1,9 +1,3 @@
-# ToDO
-
-+ make prove files
-+ bug hunting
-+ some instances crash with fingerprint
-
 # BadProver,
 
 is a simple superposition automated theorem prover.
