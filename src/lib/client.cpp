@@ -26,8 +26,8 @@ int runClient(int argc, char *argv[])
     options.add_options()("f, file", "Path to the input file", cxxopts::value<std::string>());
     options.add_options()("t, timeout",
                           "Set the maximum wall-clock time allowed for the solver to finish, in "
-                          "seconds. Setting 0 disables the timeout. Default: 0",
-                          cxxopts::value<unsigned long long>()->default_value("0"));
+                          "seconds. Setting 0 disables the timeout. Default: 60s",
+                          cxxopts::value<unsigned long long>()->default_value("60"));
     options.add_options()("v, verbose",
                           "Print the parsed signature and input clauses before saturation starts",
                           cxxopts::value<bool>()->default_value("false"));

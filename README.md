@@ -4,12 +4,13 @@
 + bug hunting
 + some instances crash with fingerprint
 
-# BadProver
+# BadProver,
 
-Is a simple superposition automated theorem prover.
-The core proving concepts are based on the material coverd in praktikum automatd theorem provers SOSE 2026 at lmu munich.
+is a simple superposition automated theorem prover.
+The core proving concepts are based on the material coverd in the praktikum automatd theorem provers SOSE 2026 at lmu munich.
 The prover takes tptp problem files as inputs and outputs UNSATISFIABLE, SATURATED or UNKNOWN in case of a timeout.
 The prover is designed to work on untyped problems in cnf.
+When using the prover, even on some of the test/benchmark problems included in this repository, at least the axioms folder of the TPTP library needs to be provided. By default the prover assumes there is a full TPTP-v9.2.1 installation in the inputs folder, but the location of axioms folder can be adjusted via the command-line.
 
 # System requirements 
 requires c++ version 20+
@@ -98,9 +99,9 @@ e.json
 ```
 
 The results of our own analysis are saved in outputs/Plots. They were created using the solver configurations stored as .json files in inputs/PlotConfigs.
-The Problemsets our analysis is based on were created by using the selection scripts easySelection.py, easySelectionSAT.py and selectionscript.py.
-Each of them just copie problems out of the TPTP problem set.
+The Problem-sets our analysis is based on were created by using the selection scripts easySelection.py, easySelectionSAT.py and selectionscript.py.
+Each of them just copies problems out of the TPTP problem set.
 
 # AI Usage Disclaimer
-AI was used to generate some Tests and was used in the cretion of the Pythonscripts easySelection.py, easySelectionSAT.py and selectionscript.py.
-Furthermore AI Tools were used for Debugging Purposes.
+AI was used to generate some of the tests and was used in the creation of the Python-scripts easySelection.py, easySelectionSAT.py and selectionscript.py.
+Furthermore AI tools like chat-gpt were used to aid in the debugging process.
