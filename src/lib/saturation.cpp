@@ -3,8 +3,7 @@
 #include "selection.hpp"
 #include "simplification.hpp"
 #include "subsumption.hpp"
-#include <functional>
-#include <variant>
+#include <unordered_set>
 
 bool isEmptyClause(const Clause &c)
 {
@@ -16,33 +15,12 @@ namespace
 
 // make the ids of all variables in a given clause c unique within the current process
 // to avoid accidental name collisions between variables
-static Clause canonicalize(const Clause &c)
+Clause canonicalize(const Clause &c)
 {
-    std::map<std::string, std::string> mapping;
-    int count = 0;
-
-    std::function<Term(const Term &)> canonicalTerm = [&](const Term &t) -> Term {
-        if (auto *v = std::get_if<Variable>(&t))
-        {
-            auto &mapped = mapping[v->name];
-            if (mapped.empty())
-                mapped = "_c" + std::to_string(count++);
-            return Variable{mapped};
-        }
-        const auto &f = *std::get<FunctionApplicationRef>(t);
-        std::vector<Term> args;
-        for (const auto &arg : f.arguments)
-        {
-            args.push_back(canonicalTerm(arg));
-        }
-        return makeFunctionApplication(f.symbol, std::move(args));
-    };
-
-    Clause result{c.id, {}};
-    for (const auto &lit : c.literals)
-        result.literals.insert(
-            Literal{canonicalTerm(lit.left), canonicalTerm(lit.right), lit.positive});
-    return result;
+    Substitution renaming;
+    for (const auto &v : FreeVariables(c))
+        renaming[v] = Variable{"_c" + std::to_string(renaming.size())};
+    return applySubstitution(renaming, c);
 }
 
 } // namespace
@@ -53,6 +31,12 @@ SaturationResult saturate(ProofState &state, int max_iteration)
     for (const auto &c : state.passive)
         state.seen.insert(c.literals);
 
+    // kept in lockstep with state.passive so selectGivenIndex never recomputes a weight
+    std::vector<int> passiveWeights;
+    passiveWeights.reserve(state.passive.size());
+    for (const auto &c : state.passive)
+        passiveWeights.push_back(clauseWeight(c));
+
     for (int iteration = 0; iteration < max_iteration; ++iteration)
     {
         if (state.passive.empty())
@@ -60,13 +44,16 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             return SaturationResult::Saturated;
         }
 
-        std::size_t idx = selectGivenIndex(state.passive, iteration % 11 == 10);
-        Clause given = state.passive[idx];
-        state.passive[idx] = state.passive.back();
-        state.passive.pop_back();
+        std::size_t idx = selectGivenIndex(state.passive, passiveWeights, iteration % 11 == 10);
 
-        state.active.push_back(given);
+        state.active.push_back(std::move(state.passive[idx]));
+        state.passive[idx] = std::move(state.passive.back());
+        state.passive.pop_back();
+        passiveWeights[idx] = passiveWeights.back();
+        passiveWeights.pop_back();
+
         std::size_t activeIdx = state.active.size() - 1;
+        const Clause &given = state.active[activeIdx];
         if (get_config_subsumption())
             state.subsumptionIndex.insert(given, activeIdx);
 
@@ -83,8 +70,8 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         for (const auto &lit : given.literals)
         {
             for (const Term &side : {lit.left, lit.right})
-                for (const auto &pos : allSubtermPositions(side))
-                    state.subtermIndex.insert(*getSubtermAt(side, pos), activeIdx);
+                for (const auto &entry : allSubtermsWithPositions(side))
+                    state.subtermIndex.insert(entry.second, activeIdx);
             if (lit.positive)
             {
                 state.eqLiteralIndex.insert(lit.left, activeIdx);
@@ -102,7 +89,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         generated.insert(generated.end(), equalityFactoringResult.begin(),
                          equalityFactoringResult.end());
 
-        std::set<std::size_t> asD;
+        std::unordered_set<std::size_t> asD;
         for (const auto &lit : given.literals)
         {
             if (!lit.positive)
@@ -117,11 +104,11 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             generated.insert(generated.end(), s1.begin(), s1.end());
         }
 
-        std::set<std::size_t> asC;
+        std::unordered_set<std::size_t> asC;
         for (const auto &lit : given.literals)
             for (const Term &side : {lit.left, lit.right})
-                for (const auto &pos : allSubtermPositions(side))
-                    for (std::size_t c : state.eqLiteralIndex.candidates(*getSubtermAt(side, pos)))
+                for (const auto &entry : allSubtermsWithPositions(side))
+                    for (std::size_t c : state.eqLiteralIndex.candidates(entry.second))
                         asC.insert(c);
         for (std::size_t c : asC)
         {
@@ -135,10 +122,10 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             removeFalseLiterals(conclusion);
             conclusion = demodulate(conclusion, state.demodulationIndex);
             removeFalseLiterals(conclusion);
-            bool subsumed = false;
-            for (const auto &lit : conclusion.literals)
-                if (lit.positive && lit.left == lit.right)
-                    goto next_conclusion;
+
+            // demodulation can introduce a tautology that wasn't there at generation time
+            if (isTautology(conclusion))
+                continue;
 
             if (isEmptyClause(conclusion))
             {
@@ -147,8 +134,11 @@ SaturationResult saturate(ProofState &state, int max_iteration)
 
             if (get_config_subsumption())
             {
+                std::vector<Literal> conclusionLits(conclusion.literals.begin(),
+                                                     conclusion.literals.end());
+                bool subsumed = false;
                 for (std::size_t candidateIdx : state.subsumptionIndex.candidates(conclusion))
-                    if (subsumes(state.active[candidateIdx], conclusion))
+                    if (subsumes(state.active[candidateIdx], conclusionLits))
                     {
                         subsumed = true;
                         break;
@@ -158,8 +148,10 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             }
 
             if (state.seen.insert(canonicalize(conclusion).literals).second)
-                state.passive.push_back(conclusion);
-        next_conclusion:;
+            {
+                passiveWeights.push_back(clauseWeight(conclusion));
+                state.passive.push_back(std::move(conclusion));
+            }
         }
     }
 
