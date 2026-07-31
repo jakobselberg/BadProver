@@ -13,8 +13,10 @@ enum class SymbolKind
 
 // Records the symbols occurring in one problem.  Functions return
 // individuals, predicates return booleans, and every argument must be an
-// individual.  A name may not be used as both kinds of symbol (or at two
-// arities).
+// individual.  A name may not be used as both kinds of symbol at the same
+// arity, though the same name may be declared at different arities: a symbol
+// is identified by name and arity together, so e.g. sum/2 and sum/3 are
+// unrelated symbols and may both be declared.
 class Signature
 {
   public:

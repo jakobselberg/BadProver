@@ -42,8 +42,8 @@ int runClient(int argc, char *argv[])
         cxxopts::value<std::string>()->default_value("tree"));
     options.add_options()(
         "disable-feature-vector-indexing",
-        "Use feature vector indexing for subsumption candidate lookup instead of a linear "
-        "scan. Default: enabled",
+        "Use a linear scan for subsumption candidate lookup instead of feature vector "
+        "indexing. Default: enabled (indexing is used)",
         cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
     options.add_options()("disable-subsumption",
                           "Eliminate clauses subsumed by an active clause. Disabling this keeps "
@@ -51,8 +51,8 @@ int runClient(int argc, char *argv[])
                           cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
     options.add_options()(
         "disable-superposition-indexing",
-        "Use a discrimination tree to look up superposition candidates instead of a linear "
-        "scan. Default: enabled",
+        "Use a linear scan to look up superposition candidates instead of a discrimination "
+        "tree. Default: enabled (indexing is used)",
         cxxopts::value<bool>()->default_value("false")->implicit_value("true"));
 
     try
