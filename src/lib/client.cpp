@@ -169,15 +169,10 @@ int runClient(int argc, char *argv[])
     // start worker thread working on the solver task
     std::thread solver_worker(std::move(solver_task));
 
-    if (get_config_timeout() == 0)
-    {
-        // if timeout is disabled, wait indefinitely until Prover is finished
-        solver_future.wait();
-        // wait until the worker has properly terminated
-        solver_worker.join();
+    // redeem future to get return value; rethrows any exception the solver threw
+    auto redeemSolverFuture = [&solver_future] {
         try
         {
-            // redeem future to get return value; rethrows any exception the solver threw
             return solver_future.get();
         }
         catch (const std::exception &e)
@@ -185,6 +180,15 @@ int runClient(int argc, char *argv[])
             std::cerr << "Error: " << e.what() << std::endl;
             return EXIT_FAILURE;
         }
+    };
+
+    if (get_config_timeout() == 0)
+    {
+        // if timeout is disabled, wait indefinitely until Prover is finished
+        solver_future.wait();
+        // wait until the worker has properly terminated
+        solver_worker.join();
+        return redeemSolverFuture();
     }
     else
     {
@@ -195,16 +199,7 @@ int runClient(int argc, char *argv[])
             // Prover finished in time: return the exit value of the worker thread
             // wait until the worker has properly terminated
             solver_worker.join();
-            try
-            {
-                // redeem future to get return value; rethrows any exception the solver threw
-                return solver_future.get();
-            }
-            catch (const std::exception &e)
-            {
-                std::cerr << "Error: " << e.what() << std::endl;
-                return EXIT_FAILURE;
-            }
+            return redeemSolverFuture();
         }
         else
         {
