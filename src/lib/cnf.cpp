@@ -8,14 +8,6 @@ Signature::Signature()
     symbols_.emplace(std::make_pair(std::string("$true"), 0), SymbolKind::Predicate);
 }
 
-std::optional<SymbolKind> Signature::lookup(const std::string &name, int arity) const
-{
-    auto it = symbols_.find(std::make_pair(name, arity));
-    if (it == symbols_.end())
-        return std::nullopt;
-    return it->second;
-}
-
 std::vector<Signature::SymbolDeclaration> Signature::declarations() const
 {
     std::vector<SymbolDeclaration> result;
@@ -91,21 +83,6 @@ std::set<Variable> FreeVariables(const Literal &lit)
 }
 
 // Clauses
-Clause makeClause(int id, std::set<Literal> lits)
-{
-    return Clause{id, std::move(lits)};
-}
-
-void addLiteralToClause(Clause &c, const Literal &lit)
-{
-    c.literals.insert(lit);
-}
-
-void removeLiteralFromClause(Clause &c, const Literal &lit)
-{
-    c.literals.erase(lit);
-}
-
 Clause applySubstitution(const Substitution &substitution, const Clause &c)
 {
     Clause result{c.id, {}};

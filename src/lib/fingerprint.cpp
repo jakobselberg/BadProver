@@ -59,13 +59,3 @@ bool featuresCompatible(const Feature &a, const Feature &b)
         return false;
     return true;
 }
-
-bool fingerprintsCompatible(const Fingerprint &indexed, const Fingerprint &query)
-{
-    if (indexed.size() != query.size())
-        return false;
-    for (std::size_t i = 0; i < indexed.size(); ++i)
-        if (!featuresCompatible(indexed[i], query[i]))
-            return false;
-    return true;
-}

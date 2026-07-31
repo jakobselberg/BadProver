@@ -20,4 +20,3 @@ bool kboGreater(const Term &s, const Term &t);
 // Multiset ordering based on KBO
 Comparison compareLiterals(const Literal &a, const Literal &b);
 bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit);
-Comparison compareClauses(const Clause &a, const Clause &b);

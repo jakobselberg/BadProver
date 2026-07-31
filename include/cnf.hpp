@@ -27,9 +27,6 @@ class Signature
 
     Signature();
 
-    // a symbol is identified by name and arity together, so e.g. sum/2 and sum/3 are
-    // unrelated symbols and may both be declared
-    std::optional<SymbolKind> lookup(const std::string &name, int arity) const;
     std::vector<SymbolDeclaration> declarations() const;
     Term applyFunction(std::string name, std::vector<Term> arguments);
     Term applyPredicate(std::string name, std::vector<Term> arguments);
@@ -73,9 +70,6 @@ Literal applySubstitution(const Substitution &substitution, const Literal &lit);
 // Get all free variables in a literal
 std::set<Variable> FreeVariables(const Literal &lit);
 
-Clause makeClause(int id, std::set<Literal> lits);
-void addLiteralToClause(Clause &c, const Literal &lit);
-void removeLiteralFromClause(Clause &c, const Literal &lit);
 // Apply substitution to a clause
 Clause applySubstitution(const Substitution &substitution, const Clause &c);
 // Get all free variables in a clause

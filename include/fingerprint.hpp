@@ -45,7 +45,6 @@ Fingerprint computeFingerprint(const Term &t);
 
 // overapproximation of unifiable features, (=not allowed to return false for unifiable ones)
 bool featuresCompatible(const Feature &a, const Feature &b);
-bool fingerprintsCompatible(const Fingerprint &indexed, const Fingerprint &query);
 
 template <class Entry> class FingerprintIndex
 {

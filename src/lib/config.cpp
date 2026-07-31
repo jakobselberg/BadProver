@@ -10,16 +10,6 @@ void set_config_file_path(std::string file_path) noexcept
     global_config.file_path = file_path;
 }
 
-std::string get_config_output_path() noexcept
-{
-    return global_config.output_path;
-}
-
-void set_config_output_path(std::string output_path) noexcept
-{
-    global_config.output_path = output_path;
-}
-
 std::string get_config_base_dir() noexcept
 {
     return global_config.base_dir;

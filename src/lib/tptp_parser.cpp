@@ -197,16 +197,6 @@ class Parser
         return readWord();
     }
 
-    // Upper-word: starts with [A-Z] or '_' then word chars. Used for variables.
-    std::string parseUpperWord(const std::string &what)
-    {
-        skipWhitespaceAndComments();
-        char c = peek();
-        if (atEnd() || !((c >= 'A' && c <= 'Z') || c == '_'))
-            error("expected " + what + " (a variable starting with upper-case or _)");
-        return readWord();
-    }
-
     std::string parseSingleQuotedString()
     {
         skipWhitespaceAndComments();

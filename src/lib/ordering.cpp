@@ -202,12 +202,3 @@ bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit)
     }
     return true;
 }
-
-Comparison compareClauses(const Clause &a, const Clause &b)
-{
-    std::vector<Literal> m(a.literals.begin(), a.literals.end());
-    std::vector<Literal> n(b.literals.begin(), b.literals.end());
-    return multisetCompare(m, n, [](const Literal &x, const Literal &y) {
-        return compareLiterals(x, y) == Comparison::Greater;
-    });
-}
