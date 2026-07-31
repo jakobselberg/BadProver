@@ -73,10 +73,12 @@ TEST_CASE("superposition on a single equality")
 
 TEST_CASE("equality resolution")
 {
-    Clause clauseC{1, std::set<Literal>{eq(V("X"), Const("a"), false), pred("p", {V("X")}, true)}};
+    // a single-literal clause is trivially maximal/eligible regardless of what
+    // unification does to it, unlike a clause with a sibling literal to compare against
+    Clause clauseC{1, std::set<Literal>{eq(V("X"), Const("a"), false)}};
     auto results = equalityResolution(clauseC);
     REQUIRE(results.size() == 1);
-    Clause expected{-1, std::set<Literal>{pred("p", {Const("a")}, true)}};
+    Clause expected{-1, {}};
     CHECK(results[0].literals == expected.literals);
 }
 

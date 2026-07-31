@@ -23,10 +23,26 @@ static void addClauseIfUseful(std::vector<Clause> &results, Clause clause)
         results.push_back(std::move(clause));
 }
 
+// Only negative literals are ever selected. Any deterministic choice preserves
+// completeness (ordered superposition with selection, see e.g. [Wal23] "Selection
+// Functions"). Selecting in a clause makes it unusable as a superposition equation
+// source (D), so to never give up D-usability we'd otherwise have, only select in
+// clauses with no positive literal at all -- those could never serve as D anyway.
+static std::optional<Literal> selectLiteral(const Clause &c)
+{
+    for (const auto &lit : c.literals)
+        if (lit.positive)
+            return std::nullopt;
+    for (const auto &lit : c.literals)
+        return lit;
+    return std::nullopt;
+}
+
 static void performSuperpositionStep(const Clause &D, const Clause &C, const Literal &dLit,
                                      const Literal &cLit, const Term &sourceTerm,
                                      const Term &targetTerm, bool targetIsLeft,
-                                     const Term &replacement, std::vector<Clause> &results)
+                                     const Term &replacement, bool nothingSelectedInC,
+                                     std::vector<Clause> &results)
 {
     for (const auto &pos : allSubtermPositions(targetTerm))
     {
@@ -43,19 +59,15 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
                         applySubstitution(*sigma, replacement)))
             continue;
 
-        std::set<Literal> posSigmaD;
-        for (const auto &l : D.literals)
-            if (l.positive)
-                posSigmaD.insert(applySubstitution(*sigma, l));
-        if (!isMaximalLiteral(posSigmaD, applySubstitution(*sigma, dLit)))
+        Clause sigmaD = applySubstitution(*sigma, D);
+        if (!isMaximalLiteral(sigmaD.literals, applySubstitution(*sigma, dLit)))
             continue;
 
-        if (cLit.positive)
-        {
-            Clause sigmaC = applySubstitution(*sigma, C);
-            if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, cLit)))
-                continue;
-        }
+        Clause sigmaC = applySubstitution(*sigma, C);
+        if (nothingSelectedInC &&
+            !isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, cLit)))
+            continue;
+
         Clause cCopy{-1, C.literals};
         cCopy.literals.erase(cLit);
 
@@ -97,6 +109,14 @@ std::vector<Clause> superposition(const Clause &D, const Clause &C)
 
     Clause dRenamed = standardizeApart(D);
 
+    // D's literal must be positive, and only negative literals are ever selected, so D
+    // is only usable here when nothing in it is selected at all.
+    if (selectLiteral(dRenamed))
+        return {};
+
+    std::optional<Literal> selectedC = selectLiteral(C);
+    bool nothingSelectedInC = !selectedC.has_value();
+
     std::vector<Clause> results;
     for (const auto &dLit : dRenamed.literals)
     {
@@ -112,11 +132,13 @@ std::vector<Clause> superposition(const Clause &D, const Clause &C)
         {
             for (const auto &cLit : C.literals)
             {
+                if (selectedC && cLit != *selectedC)
+                    continue;
 
                 performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.left, /*targetIsLeft=*/true,
-                                         tPrime, results);
+                                         tPrime, nothingSelectedInC, results);
                 performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.right,
-                                         /*targetIsLeft=*/false, tPrime, results);
+                                         /*targetIsLeft=*/false, tPrime, nothingSelectedInC, results);
             }
         }
     }
@@ -126,14 +148,24 @@ std::vector<Clause> superposition(const Clause &D, const Clause &C)
 std::vector<Clause> equalityResolution(const Clause &C)
 {
     std::vector<Clause> results;
+    std::optional<Literal> selected = selectLiteral(C);
     for (const auto &lit : C.literals)
     {
         if (lit.positive)
+            continue;
+        if (selected && lit != *selected)
             continue;
 
         auto sigma = mgu(lit.left, lit.right);
         if (!sigma)
             continue;
+
+        if (!selected)
+        {
+            Clause sigmaC = applySubstitution(*sigma, C);
+            if (!isMaximalLiteral(sigmaC.literals, applySubstitution(*sigma, lit)))
+                continue;
+        }
 
         Clause resolvent{-1, C.literals};
         resolvent.literals.erase(lit);
@@ -146,6 +178,11 @@ std::vector<Clause> equalityResolution(const Clause &C)
 std::vector<Clause> equalityFactoring(const Clause &C)
 {
     std::vector<Clause> results;
+    // factoring only ever fires on positive literals, so it's void whenever C has a
+    // selected (necessarily negative) literal
+    if (selectLiteral(C))
+        return results;
+
     std::vector<Literal> eqLits;
     for (const auto &lit : C.literals)
     {
