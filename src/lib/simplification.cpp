@@ -1,8 +1,6 @@
 #include "simplification.hpp"
 #include "ordering.hpp"
-#include "tptp_parser.hpp"
 #include "unification.hpp"
-#include "util.hpp"
 #include <map>
 
 namespace
@@ -64,8 +62,6 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const DemodulationIndex
                 }
 
                 if (!replacement)
-                    continue;
-                if (!pos.empty() && *replacement == tptpTrue())
                     continue;
 
                 auto newTerm = setSubtermAt(target, pos, *replacement);
