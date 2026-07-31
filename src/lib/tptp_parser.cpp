@@ -1,7 +1,7 @@
 #include "tptp_parser.hpp"
+#include "util.hpp"
 
 #include <cctype>
-#include <fstream>
 #include <sstream>
 #include <string>
 
@@ -22,11 +22,6 @@ class Parser
 
   public:
     explicit Parser(std::string_view src) : src_(src)
-    {
-    }
-
-    explicit Parser(std::string_view src, std::string baseDir)
-        : src_(src), baseDir_(std::move(baseDir))
     {
     }
 
@@ -305,12 +300,15 @@ class Parser
             error("cannot resolve include directive without a file path context");
 
         std::string fullPath = baseDir_ + "/" + path;
-        std::ifstream in(fullPath);
-        if (!in)
+        std::string contents;
+        try
+        {
+            contents = load_file_from_path(fullPath);
+        }
+        catch (const std::runtime_error &)
+        {
             error("could not open included file: " + fullPath);
-        std::ostringstream oss;
-        oss << in.rdbuf();
-        std::string contents = oss.str();
+        }
 
         std::string includedDir = fullPath.substr(0, fullPath.rfind('/'));
         Parser sub(contents, includedDir, *signature_);
@@ -512,14 +510,16 @@ std::vector<Clause> parseTPTPCNF(std::string_view input)
 std::vector<Clause> parseTPTPCNFFromFile(const std::string &path, const std::string &base_dir,
                                          Signature &signature)
 {
-    std::ifstream in(path);
-    if (!in)
+    std::string contents;
+    try
+    {
+        contents = load_file_from_path(path);
+    }
+    catch (const std::runtime_error &)
+    {
         throw TPTPParseError("could not open file: " + path);
-    std::ostringstream oss;
-    oss << in.rdbuf();
-    std::string contents = oss.str();
+    }
 
-    std::string dir = path.substr(0, path.rfind('/'));
     Parser p(contents, base_dir, signature);
     return p.parseFile();
 }

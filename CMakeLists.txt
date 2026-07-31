@@ -59,7 +59,6 @@ function(add_doctest TEST_NAME)
 endfunction()
 
 add_doctest(terms_test)
-add_doctest(differenttest)
 add_doctest(tptp_parser_test)
 add_doctest(inference_test)
 add_doctest(discrimination_tree_test)
