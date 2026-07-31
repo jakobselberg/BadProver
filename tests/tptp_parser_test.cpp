@@ -11,6 +11,9 @@
 #include "terms.hpp"
 #include "tptp_parser.hpp"
 
+#include <filesystem>
+#include <fstream>
+
 namespace
 {
 
@@ -142,6 +145,43 @@ TEST_CASE("rejects non-cnf languages")
 TEST_CASE("rejects include directives")
 {
     CHECK_THROWS_AS(parseTPTPCNF("include('foo.ax')."), TPTPParseError);
+}
+
+TEST_CASE("plain include pulls in all clauses from the included file, "
+         "selective include is rejected")
+{
+    std::filesystem::path dir =
+        std::filesystem::temp_directory_path() /
+        std::filesystem::path("badprover_include_test");
+    std::filesystem::create_directories(dir);
+
+    {
+        std::ofstream ax(dir / "ax.p");
+        ax << "cnf(a1, axiom, p(X)).\n";
+        ax << "cnf(a2, axiom, q(X)).\n";
+    }
+
+    {
+        std::ofstream main(dir / "plain.p");
+        main << "include('ax.p').\n";
+        main << "cnf(c1, axiom, r(X)).\n";
+    }
+    Signature plainSig;
+    std::vector<Clause> plainClauses =
+        parseTPTPCNFFromFile((dir / "plain.p").string(), dir.string(), plainSig);
+    CHECK(plainClauses.size() == 3);
+
+    {
+        std::ofstream selective(dir / "selective.p");
+        selective << "include('ax.p', [a1]).\n";
+        selective << "cnf(c1, axiom, r(X)).\n";
+    }
+    Signature selectiveSig;
+    CHECK_THROWS_AS(
+        parseTPTPCNFFromFile((dir / "selective.p").string(), dir.string(), selectiveSig),
+        TPTPParseError);
+
+    std::filesystem::remove_all(dir);
 }
 
 TEST_CASE("rejects missing terminator")

@@ -21,11 +21,12 @@ const Term &tptpTrue();
 //   atoms:    lower_word | lower_word(term, ...)
 //   terms:    variable (upper-case or _-leading) | function application
 //
-// Unsupported constructs (fof/tff/thf/include/distinct objects/numbers/...)
-// = everything else triggers a TPTPParseError
+// Unsupported constructs (fof/tff/thf/selective include/distinct objects/numbers/...)
+// = everything else triggers a TPTPParseError. Non-selective includes
+// (include('file').) are supported when a base directory is available.
 
-// This Function is only used for testing, since it can not handle includes
-// and can not distinguish between Predicates and Functions.
+// This function is only used for testing, since it has no base directory to
+// resolve includes against.
 std::vector<Clause> parseTPTPCNF(std::string_view input);
 
 // read a problem file and parse it

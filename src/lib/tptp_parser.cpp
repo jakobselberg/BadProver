@@ -277,19 +277,9 @@ class Parser
 
         skipWhitespaceAndComments();
         if (match(','))
-        {
-            skipWhitespaceAndComments();
-            expect('[', "include name list");
-            int depth = 1;
-            while (!atEnd() && depth > 0)
-            {
-                char c = advance();
-                if (c == '[')
-                    ++depth;
-                else if (c == ']')
-                    --depth;
-            }
-        }
+            error("selective include('" + path + "', [...]) is not supported: "
+                  "importing only a subset of formula names would silently change "
+                  "the input if implemented incorrectly, so it is rejected instead");
 
         skipWhitespaceAndComments();
         expect(')', "to close include(...)");
