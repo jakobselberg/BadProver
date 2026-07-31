@@ -54,9 +54,10 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         if (!sigma)
             continue;
 
-        // check ordering side-conditions
-        if (!kboGreater(applySubstitution(*sigma, sourceTerm),
-                        applySubstitution(*sigma, replacement)))
+        // check ordering side-conditions: reject only a forbidden *smaller* orientation;
+        // an incomparable orientation (e.g. terms sharing no variables) remains eligible
+        if (kboCompare(applySubstitution(*sigma, sourceTerm),
+                       applySubstitution(*sigma, replacement)) == Comparison::Less)
             continue;
 
         Clause sigmaD = applySubstitution(*sigma, D);

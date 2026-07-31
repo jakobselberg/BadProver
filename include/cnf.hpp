@@ -27,18 +27,15 @@ class Signature
 
     Signature();
 
-    std::optional<SymbolKind> lookup(const std::string &name) const;
+    // a symbol is identified by name and arity together, so e.g. sum/2 and sum/3 are
+    // unrelated symbols and may both be declared
+    std::optional<SymbolKind> lookup(const std::string &name, int arity) const;
     std::vector<SymbolDeclaration> declarations() const;
     Term applyFunction(std::string name, std::vector<Term> arguments);
     Term applyPredicate(std::string name, std::vector<Term> arguments);
 
   private:
-    struct Entry
-    {
-        SymbolKind kind;
-        int arity;
-    };
-    std::map<std::string, Entry> symbols_;
+    std::map<std::pair<std::string, int>, SymbolKind> symbols_;
 
     Term apply(SymbolKind kind, std::string name, std::vector<Term> arguments);
 };

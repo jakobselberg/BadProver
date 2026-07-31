@@ -5,23 +5,23 @@
 Signature::Signature()
 {
     // $true is the Boolean value used to reify predicate literals.
-    symbols_.emplace("$true", Entry{SymbolKind::Predicate, 0});
+    symbols_.emplace(std::make_pair(std::string("$true"), 0), SymbolKind::Predicate);
 }
 
-std::optional<SymbolKind> Signature::lookup(const std::string &name) const
+std::optional<SymbolKind> Signature::lookup(const std::string &name, int arity) const
 {
-    auto it = symbols_.find(name);
+    auto it = symbols_.find(std::make_pair(name, arity));
     if (it == symbols_.end())
         return std::nullopt;
-    return it->second.kind;
+    return it->second;
 }
 
 std::vector<Signature::SymbolDeclaration> Signature::declarations() const
 {
     std::vector<SymbolDeclaration> result;
     result.reserve(symbols_.size());
-    for (const auto &[name, entry] : symbols_)
-        result.push_back(SymbolDeclaration{name, entry.kind, entry.arity});
+    for (const auto &[key, kind] : symbols_)
+        result.push_back(SymbolDeclaration{key.first, kind, key.second});
     return result;
 }
 
@@ -44,8 +44,8 @@ Term Signature::apply(SymbolKind kind, std::string name, std::vector<Term> argum
             throw std::invalid_argument("a symbol argument must have individual type");
     }
 
-    auto [it, inserted] = symbols_.emplace(name, Entry{kind, arity});
-    if (!inserted && (it->second.kind != kind || it->second.arity != arity))
+    auto [it, inserted] = symbols_.emplace(std::make_pair(name, arity), kind);
+    if (!inserted && it->second != kind)
         throw std::invalid_argument("inconsistent use of symbol '" + name + "'");
 
     TermType resultType = kind == SymbolKind::Function ? TermType::Individual : TermType::Boolean;
