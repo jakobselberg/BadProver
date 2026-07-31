@@ -69,6 +69,8 @@ struct Clause
 
 Literal makeLiteral(Term left, Term right, bool positive);
 Literal negateLiteral(const Literal &lit);
+// A clause containing a reflexive equality (s = s) or complementary literals (p and ~p)
+bool isTautology(const Clause &c);
 // Apply substitution to a literal
 Literal applySubstitution(const Substitution &substitution, const Literal &lit);
 // Get all free variables in a literal

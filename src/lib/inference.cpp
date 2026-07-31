@@ -1,8 +1,6 @@
 #include "inference.hpp"
 #include "ordering.hpp"
-#include "tptp_parser.hpp"
 #include "unification.hpp"
-#include "util.hpp"
 #include <array>
 
 namespace
@@ -19,23 +17,6 @@ static Clause standardizeApart(const Clause &c)
     return applySubstitution(renaming, c);
 }
 
-static Literal invertLiteral(const Literal &lit)
-{
-    return Literal{lit.left, lit.right, !lit.positive};
-}
-
-static bool isTautology(const Clause &c)
-{
-    for (const auto &lit : c.literals)
-    {
-        if (c.literals.contains(invertLiteral(lit)))
-            return true;
-        if (lit.positive && lit.left == lit.right)
-            return true;
-    }
-    return false;
-}
-
 static void addClauseIfUseful(std::vector<Clause> &results, Clause clause)
 {
     if (!isTautology(clause))
@@ -44,8 +25,8 @@ static void addClauseIfUseful(std::vector<Clause> &results, Clause clause)
 
 static void performSuperpositionStep(const Clause &D, const Clause &C, const Literal &dLit,
                                      const Literal &cLit, const Term &sourceTerm,
-                                     const Term &targetTerm, const Term &replacement,
-                                     std::vector<Clause> &results)
+                                     const Term &targetTerm, bool targetIsLeft,
+                                     const Term &replacement, std::vector<Clause> &results)
 {
     for (const auto &pos : allSubtermPositions(targetTerm))
     {
@@ -53,8 +34,6 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         if (!maybeSubterm)
             continue;
 
-        if (!pos.empty() && replacement == tptpTrue())
-            continue;
         auto sigma = mgu(sourceTerm, *maybeSubterm);
         if (!sigma)
             continue;
@@ -64,11 +43,10 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
                         applySubstitution(*sigma, replacement)))
             continue;
 
-        Clause sigmaD = applySubstitution(*sigma, D);
         std::set<Literal> posSigmaD;
-        for (const auto &l : sigmaD.literals)
+        for (const auto &l : D.literals)
             if (l.positive)
-                posSigmaD.insert(l);
+                posSigmaD.insert(applySubstitution(*sigma, l));
         if (!isMaximalLiteral(posSigmaD, applySubstitution(*sigma, dLit)))
             continue;
 
@@ -84,7 +62,7 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         Literal replacedLiteral = cLit;
 
         // equality literal: replace the proper side
-        if (targetTerm == cLit.left)
+        if (targetIsLeft)
         {
             auto newLeft = setSubtermAt(cLit.left, pos, replacement);
             if (!newLeft)
@@ -106,8 +84,7 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
         dCopy.literals.erase(dLit);
         dCopy = applySubstitution(*sigma, dCopy);
 
-        Clause merged{-1, {}};
-        merged.literals = cCopy.literals;
+        Clause merged{-1, std::move(cCopy.literals)};
         merged.literals.merge(dCopy.literals);
         addClauseIfUseful(results, std::move(merged));
     }
@@ -136,8 +113,10 @@ std::vector<Clause> superposition(const Clause &D, const Clause &C)
             for (const auto &cLit : C.literals)
             {
 
-                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.left, tPrime, results);
-                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.right, tPrime, results);
+                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.left, /*targetIsLeft=*/true,
+                                         tPrime, results);
+                performSuperpositionStep(dRenamed, C, dLit, cLit, t, cLit.right,
+                                         /*targetIsLeft=*/false, tPrime, results);
             }
         }
     }

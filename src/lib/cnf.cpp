@@ -56,12 +56,24 @@ Term Signature::apply(SymbolKind kind, std::string name, std::vector<Term> argum
 // Literals
 Literal makeLiteral(Term left, Term right, bool positive)
 {
-    return Literal{left, right, positive};
+    return Literal{std::move(left), std::move(right), positive};
 }
 
 Literal negateLiteral(const Literal &lit)
 {
     return Literal{lit.left, lit.right, !lit.positive};
+}
+
+bool isTautology(const Clause &c)
+{
+    for (const auto &lit : c.literals)
+    {
+        if (c.literals.contains(negateLiteral(lit)))
+            return true;
+        if (lit.positive && lit.left == lit.right)
+            return true;
+    }
+    return false;
 }
 
 Literal applySubstitution(const Substitution &substitution, const Literal &lit)
@@ -81,9 +93,7 @@ std::set<Variable> FreeVariables(const Literal &lit)
 // Clauses
 Clause makeClause(int id, std::set<Literal> lits)
 {
-    Clause c{id, {}};
-    c.literals = std::move(lits);
-    return c;
+    return Clause{id, std::move(lits)};
 }
 
 void addLiteralToClause(Clause &c, const Literal &lit)
