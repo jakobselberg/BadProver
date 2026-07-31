@@ -22,3 +22,6 @@ class SubsumptionIndex
 };
 
 bool subsumes(const Clause &A, const Clause &C);
+// like subsumes(A, C), but for checking many A's against the same C: cLits is
+// C.literals already extracted into a vector, so callers don't rebuild it every call
+bool subsumes(const Clause &A, const std::vector<Literal> &cLits);

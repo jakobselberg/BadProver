@@ -72,9 +72,9 @@ std::optional<Substitution> mgu(const Term &t, const Term &u)
     return mgu(std::vector<std::pair<Term, Term>>{{t, u}});
 }
 
-std::optional<Substitution> matchTerm(const Term &pattern, const Term &target)
+std::optional<Substitution> matchTerm(const Term &pattern, const Term &target, Substitution start)
 {
-    Substitution sigma;
+    Substitution sigma = std::move(start);
     std::vector<std::pair<Term, Term>> worklist{{pattern, target}};
     while (!worklist.empty())
     {

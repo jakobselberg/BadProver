@@ -1,35 +1,9 @@
 #include "subsumption.hpp"
 #include "cnf.hpp"
+#include "unification.hpp"
 
 namespace
 {
-static std::optional<Substitution> matchTerm(const Term &pattern, const Term &subject,
-                                             Substitution sigma)
-{
-    if (auto *v = std::get_if<Variable>(&pattern))
-    {
-        auto it = sigma.find(*v);
-        if (it != sigma.end())
-            return it->second == subject ? std::make_optional(sigma) : std::nullopt;
-        sigma[*v] = subject;
-        return sigma;
-    }
-    if (std::get_if<Variable>(&subject))
-        return std::nullopt;
-    const auto &f = *std::get<FunctionApplicationRef>(pattern);
-    const auto &g = *std::get<FunctionApplicationRef>(subject);
-    if (f.symbol != g.symbol)
-        return std::nullopt;
-    for (size_t i = 0; i < f.arguments.size(); i++)
-    {
-        auto r = matchTerm(f.arguments[i], g.arguments[i], sigma);
-        if (!r)
-            return std::nullopt;
-        sigma = std::move(*r);
-    }
-    return sigma;
-}
-
 static bool subsumesHelper(const std::vector<Literal> &aLits, std::size_t idx,
                            const std::vector<Literal> &cLits, std::vector<bool> &used,
                            Substitution sigma)
@@ -80,12 +54,17 @@ std::vector<std::size_t> SubsumptionIndex::candidates(const Clause &c) const
     return std::visit([&](const auto &idx) { return idx.candidates(c); }, impl_);
 }
 
-bool subsumes(const Clause &A, const Clause &C)
+bool subsumes(const Clause &A, const std::vector<Literal> &cLits)
 {
-    if (A.literals.size() > C.literals.size())
+    if (A.literals.size() > cLits.size())
         return false;
     std::vector<Literal> aLits(A.literals.begin(), A.literals.end());
-    std::vector<Literal> cLits(C.literals.begin(), C.literals.end());
     std::vector<bool> used(cLits.size(), false);
     return subsumesHelper(aLits, 0, cLits, used, {});
+}
+
+bool subsumes(const Clause &A, const Clause &C)
+{
+    std::vector<Literal> cLits(C.literals.begin(), C.literals.end());
+    return subsumes(A, cLits);
 }

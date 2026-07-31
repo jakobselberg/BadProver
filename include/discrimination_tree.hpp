@@ -111,6 +111,7 @@ template <class Entry> class DiscriminationTree
         const DiscrKey &tok = tokens[pos];
         if (tok.kind == DiscrKeyKind::Star)
         {
+            // a query variable can be unified with any indexed subtree, so fan out over all of them
             std::vector<const Node *> dests;
             skipInTrie(node, dests);
             for (const Node *dest : dests)
@@ -139,6 +140,8 @@ template <class Entry> class DiscriminationTree
         const DiscrKey &tok = tokens[pos];
         if (tok.kind == DiscrKeyKind::Star)
         {
+            // matching never instantiates the query, so a query variable can only be matched
+            // by an indexed variable at the same position, not by fanning out like collect() does
             auto starIt = node->children.find(DiscrKey{DiscrKeyKind::Star, {}});
             if (starIt != node->children.end())
                 collectGeneralisations(starIt->second.get(), tokens, pos + 1, out);
