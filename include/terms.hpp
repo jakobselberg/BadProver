@@ -5,6 +5,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -84,9 +85,13 @@ using Position = std::vector<int>;
 std::optional<Term> getSubtermAt(const Term &t, const Position &pos);
 std::optional<Term> setSubtermAt(const Term &t, const Position &pos, const Term &replacement);
 std::vector<Position> allSubtermPositions(const Term &t);
+// like allSubtermPositions, but avoids a second root-to-leaf walk to fetch each subterm
+std::vector<std::pair<Position, Term>> allSubtermsWithPositions(const Term &t);
 
 Term applySubstitution(const Substitution &substitution, const Term &t);
 
 std::set<Variable> GetFreeVariables(const Term &t);
 
 Substitution composeSubstitutions(const Substitution &first, const Substitution &second);
+
+int termWeight(const Term &t);

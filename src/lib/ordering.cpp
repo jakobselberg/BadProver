@@ -5,17 +5,6 @@
 
 namespace
 {
-int termWeight(const Term &t)
-{
-    if (std::holds_alternative<Variable>(t))
-        return 1;
-    const auto &app = *std::get<FunctionApplicationRef>(t);
-    int w = 1;
-    for (const auto &arg : app.arguments)
-        w += termWeight(arg);
-    return w;
-}
-
 void collectVariableCounts(const Term &t, std::map<Variable, int> &counts)
 {
     if (const auto *v = std::get_if<Variable>(&t))
@@ -57,6 +46,83 @@ std::vector<Term> literalMultiset(const Literal &lit)
     if (lit.positive)
         return {lit.left, lit.right};
     return {lit.left, lit.left, lit.right, lit.right};
+}
+
+// Dershowitz-Manna multiset extension of the order tested by elementGreater:
+// match up equal elements, then check whether every leftover element on one
+// side is dominated by some leftover element on the other.
+template <class T, class Greater>
+Comparison multisetCompare(const std::vector<T> &m, const std::vector<T> &n, Greater elementGreater)
+{
+    std::vector<bool> nUsed(n.size(), false);
+    std::vector<T> mRest;
+    for (const auto &x : m)
+    {
+        bool matched = false;
+        for (std::size_t j = 0; j < n.size(); ++j)
+        {
+            if (!nUsed[j] && x == n[j])
+            {
+                nUsed[j] = true;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched)
+            mRest.push_back(x);
+    }
+
+    std::vector<T> nRest;
+    for (std::size_t j = 0; j < n.size(); ++j)
+        if (!nUsed[j])
+            nRest.push_back(n[j]);
+
+    if (mRest.empty() && nRest.empty())
+        return Comparison::Equal;
+    if (mRest.empty())
+        return Comparison::Less;
+    if (nRest.empty())
+        return Comparison::Greater;
+
+    bool mGreater = true;
+    for (const auto &y : nRest)
+    {
+        bool covered = false;
+        for (const auto &x : mRest)
+            if (elementGreater(x, y))
+            {
+                covered = true;
+                break;
+            }
+        if (!covered)
+        {
+            mGreater = false;
+            break;
+        }
+    }
+    if (mGreater)
+        return Comparison::Greater;
+
+    bool nGreater = true;
+    for (const auto &x : mRest)
+    {
+        bool covered = false;
+        for (const auto &y : nRest)
+            if (elementGreater(y, x))
+            {
+                covered = true;
+                break;
+            }
+        if (!covered)
+        {
+            nGreater = false;
+            break;
+        }
+    }
+    if (nGreater)
+        return Comparison::Less;
+
+    return Comparison::Incomparable;
 }
 } // namespace
 Comparison kboCompare(const Term &s, const Term &t)
@@ -120,77 +186,9 @@ bool kboGreater(const Term &s, const Term &t)
 
 Comparison compareLiterals(const Literal &a, const Literal &b)
 {
-    std::vector<Term> m = literalMultiset(a);
-    std::vector<Term> n = literalMultiset(b);
-
-    std::vector<bool> nUsed(n.size(), false);
-    std::vector<Term> mRest;
-    for (const auto &x : m)
-    {
-        bool matched = false;
-        for (std::size_t j = 0; j < n.size(); ++j)
-        {
-            if (!nUsed[j] && x == n[j])
-            {
-                nUsed[j] = true;
-                matched = true;
-                break;
-            }
-        }
-        if (!matched)
-            mRest.push_back(x);
-    }
-
-    std::vector<Term> nRest;
-    for (std::size_t j = 0; j < n.size(); ++j)
-        if (!nUsed[j])
-            nRest.push_back(n[j]);
-    if (mRest.empty() && nRest.empty())
-        return Comparison::Equal;
-    if (mRest.empty())
-        return Comparison::Less;
-    if (nRest.empty())
-        return Comparison::Greater;
-
-    // m > n iff every remaining element in n is strictly below some element of m
-    bool mGreater = true;
-    for (const auto &y : nRest)
-    {
-        bool covered = false;
-        for (const auto &x : mRest)
-            if (kboCompare(x, y) == Comparison::Greater)
-            {
-                covered = true;
-                break;
-            }
-        if (!covered)
-        {
-            mGreater = false;
-            break;
-        }
-    }
-    if (mGreater)
-        return Comparison::Greater;
-    bool nGreater = true;
-    for (const auto &x : mRest)
-    {
-        bool covered = false;
-        for (const auto &y : nRest)
-            if (kboCompare(y, x) == Comparison::Greater)
-            {
-                covered = true;
-                break;
-            }
-        if (!covered)
-        {
-            nGreater = false;
-            break;
-        }
-    }
-    if (nGreater)
-        return Comparison::Less;
-
-    return Comparison::Incomparable;
+    return multisetCompare(literalMultiset(a), literalMultiset(b), [](const Term &x, const Term &y) {
+        return kboCompare(x, y) == Comparison::Greater;
+    });
 }
 
 bool isMaximalLiteral(const std::set<Literal> &lits, const Literal &lit)
@@ -209,76 +207,7 @@ Comparison compareClauses(const Clause &a, const Clause &b)
 {
     std::vector<Literal> m(a.literals.begin(), a.literals.end());
     std::vector<Literal> n(b.literals.begin(), b.literals.end());
-
-    std::vector<bool> nUsed(n.size(), false);
-    std::vector<Literal> mRest;
-    for (const auto &x : m)
-    {
-        bool matched = false;
-        for (std::size_t j = 0; j < n.size(); ++j)
-        {
-            if (!nUsed[j] && x == n[j])
-            {
-                nUsed[j] = true;
-                matched = true;
-                break;
-            }
-        }
-        if (!matched)
-            mRest.push_back(x);
-    }
-
-    std::vector<Literal> nRest;
-    for (std::size_t j = 0; j < n.size(); ++j)
-    {
-        if (!nUsed[j])
-            nRest.push_back(n[j]);
-    }
-
-    if (mRest.empty() && nRest.empty())
-        return Comparison::Equal;
-    if (mRest.empty())
-        return Comparison::Less;
-    if (nRest.empty())
-        return Comparison::Greater;
-
-    bool mGreater = true;
-    for (const auto &y : nRest)
-    {
-        bool covered = false;
-        for (const auto &x : mRest)
-            if (compareLiterals(x, y) == Comparison::Greater)
-            {
-                covered = true;
-                break;
-            }
-        if (!covered)
-        {
-            mGreater = false;
-            break;
-        }
-    }
-    if (mGreater)
-        return Comparison::Greater;
-
-    bool nGreater = true;
-    for (const auto &x : mRest)
-    {
-        bool covered = false;
-        for (const auto &y : nRest)
-            if (compareLiterals(y, x) == Comparison::Greater)
-            {
-                covered = true;
-                break;
-            }
-        if (!covered)
-        {
-            nGreater = false;
-            break;
-        }
-    }
-    if (nGreater)
-        return Comparison::Less;
-
-    return Comparison::Incomparable;
+    return multisetCompare(m, n, [](const Literal &x, const Literal &y) {
+        return compareLiterals(x, y) == Comparison::Greater;
+    });
 }
