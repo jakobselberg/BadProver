@@ -17,11 +17,17 @@ static std::optional<Term> tryApplyRule(const Term &sub, const RewriteRule &rule
     return applySubstitution(*sigma, rule.rhs);
 }
 
-static Clause buildRewrittenClause(const Clause &C, const Literal &lit, int side,
+enum class LiteralSide
+{
+    Left,
+    Right,
+};
+
+static Clause buildRewrittenClause(const Clause &C, const Literal &lit, LiteralSide side,
                                    const Term &newTerm)
 {
     Literal newLit = lit;
-    if (side == 0)
+    if (side == LiteralSide::Left)
         newLit.left = newTerm;
     else
         newLit.right = newTerm;
@@ -37,25 +43,21 @@ std::optional<Clause> tryDemodulateOnce(const Clause &C, const DemodulationIndex
 {
     for (const auto &lit : C.literals)
     {
-        for (int side = 0; side < 2; ++side)
+        for (LiteralSide side : {LiteralSide::Left, LiteralSide::Right})
         {
-            const Term &target = (side == 0) ? lit.left : lit.right;
-            for (const auto &pos : allSubtermPositions(target))
+            const Term &target = (side == LiteralSide::Left) ? lit.left : lit.right;
+            for (const auto &[pos, sub] : allSubtermsWithPositions(target))
             {
-                auto sub = getSubtermAt(target, pos);
-                if (!sub)
+                if (std::holds_alternative<Variable>(sub))
                     continue;
 
-                if (std::holds_alternative<Variable>(*sub))
-                    continue;
-
-                auto [cacheIt, inserted] = cache.try_emplace(*sub);
+                auto [cacheIt, inserted] = cache.try_emplace(sub);
                 std::optional<Term> &replacement = cacheIt->second;
                 if (inserted)
                 {
-                    for (const auto &rule : index.matchCandidates(*sub))
+                    for (const auto &rule : index.matchCandidates(sub))
                     {
-                        replacement = tryApplyRule(*sub, rule);
+                        replacement = tryApplyRule(sub, rule);
                         if (replacement)
                             break;
                     }

@@ -52,13 +52,9 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
                                      const Term &replacement, bool nothingSelectedInC,
                                      std::vector<Clause> &results)
 {
-    for (const auto &pos : allSubtermPositions(targetTerm))
+    for (const auto &[pos, subterm] : allSubtermsWithPositions(targetTerm))
     {
-        auto maybeSubterm = getSubtermAt(targetTerm, pos);
-        if (!maybeSubterm)
-            continue;
-
-        auto sigma = mgu(sourceTerm, *maybeSubterm);
+        auto sigma = mgu(sourceTerm, subterm);
         if (!sigma)
             continue;
 
