@@ -4,7 +4,7 @@ is a simple superposition automated theorem prover.
 The core proving concepts are based on the material coverd in the praktikum automatd theorem provers SOSE 2026 at lmu munich.
 The prover takes tptp problem files as inputs and outputs UNSATISFIABLE, SATURATED or UNKNOWN in case of a timeout.
 The prover is designed to work on untyped problems in cnf.
-When using the prover, even on some of the test/benchmark problems included in this repository, at least the axioms folder of the TPTP library needs to be provided. By default the prover assumes there is a full TPTP-v9.2.1 installation in the inputs folder, but the location of axioms folder can be adjusted via the command-line.
+When using the prover, even on some of the test/benchmark problems included in this repository, at least the axioms folder of the TPTP library needs to be provided. By default the prover assumes there is a full TPTP-v9.2.1 installation in the inputs folder, but the location of axioms folder can be adjusted via the command-line via -b.
 
 # System requirements 
 requires c++ version 20+
@@ -45,7 +45,7 @@ to configure and build run:
 ./build.sh
 ```
 
-to rebuild the build folder and buid run:
+to rebuild the build folder and build run:
 ```
 ./build.sh --clean
 ```
