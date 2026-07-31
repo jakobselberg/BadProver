@@ -3,7 +3,6 @@
 #include "selection.hpp"
 #include "simplification.hpp"
 #include "subsumption.hpp"
-#include <unordered_set>
 
 bool isEmptyClause(const Clause &c)
 {
@@ -13,12 +12,36 @@ bool isEmptyClause(const Clause &c)
 namespace
 {
 
-// make the ids of all variables in a given clause c unique within the current process
-// to avoid accidental name collisions between variables
+void collectVariablesInOrder(const Term &t, std::vector<Variable> &order, std::set<Variable> &seen)
+{
+    if (auto *v = std::get_if<Variable>(&t))
+    {
+        if (seen.insert(*v).second)
+            order.push_back(*v);
+        return;
+    }
+    const auto &f = *std::get<FunctionApplicationRef>(t);
+    for (const auto &arg : f.arguments)
+        collectVariablesInOrder(arg, order, seen);
+}
+
+// Rename c's variables to be unique within the current process. Renaming must go in
+// structural first-occurrence order (not e.g. alphabetically by original name), since
+// this is used as a key for detecting clauses that are equal up to variable renaming:
+// two such clauses only canonicalize to the same result if the naming scheme depends
+// on structure alone, never on what the original variable names happened to be.
 Clause canonicalize(const Clause &c)
 {
+    std::vector<Variable> order;
+    std::set<Variable> seen;
+    for (const auto &lit : c.literals)
+    {
+        collectVariablesInOrder(lit.left, order, seen);
+        collectVariablesInOrder(lit.right, order, seen);
+    }
+
     Substitution renaming;
-    for (const auto &v : FreeVariables(c))
+    for (const auto &v : order)
         renaming[v] = Variable{"_c" + std::to_string(renaming.size())};
     return applySubstitution(renaming, c);
 }
@@ -89,7 +112,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
         generated.insert(generated.end(), equalityFactoringResult.begin(),
                          equalityFactoringResult.end());
 
-        std::unordered_set<std::size_t> asD;
+        std::set<std::size_t> asD;
         for (const auto &lit : given.literals)
         {
             if (!lit.positive)
@@ -104,7 +127,7 @@ SaturationResult saturate(ProofState &state, int max_iteration)
             generated.insert(generated.end(), s1.begin(), s1.end());
         }
 
-        std::unordered_set<std::size_t> asC;
+        std::set<std::size_t> asC;
         for (const auto &lit : given.literals)
             for (const Term &side : {lit.left, lit.right})
                 for (const auto &entry : allSubtermsWithPositions(side))
