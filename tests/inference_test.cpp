@@ -71,6 +71,33 @@ TEST_CASE("superposition on a single equality")
     CHECK(results[0].literals == expected.literals);
 }
 
+TEST_CASE("superposition avoids capturing a variable the other clause already uses")
+{
+    // Y survives unification untouched, so it must be renamed apart. C already has a
+    // variable literally named "_v0", the first name fresh-variable generation tries,
+    // so the renamer must skip it or Y and C's unrelated "_v0" would collide.
+    Clause D{1, std::set<Literal>{eq(F("f", {V("X")}), Const("a"), true),
+                                  eq(V("Y"), Const("z"), false)}};
+    Clause C{2, std::set<Literal>{pred("p", {F("f", {Const("b")})}, true),
+                                  pred("r", {V("_v0")}, true)}};
+
+    auto results = superposition(D, C);
+    // Only the candidate that rewrites p(f(b)) and leaves r(_v0) untouched exercises the
+    // collision this test guards against, so search for it instead of relying on order.
+    bool foundRewrite = false;
+    for (const auto &clause : results)
+    {
+        if (!clause.literals.contains(pred("p", {Const("a")}, true)))
+            continue;
+        foundRewrite = true;
+        std::set<Variable> freeVars = FreeVariables(clause);
+        CHECK(freeVars.size() == 2);
+        CHECK(freeVars.count(Variable{"_v0"}) == 1);
+        CHECK(clause.literals.contains(pred("r", {V("_v0")}, true)));
+    }
+    CHECK(foundRewrite);
+}
+
 TEST_CASE("equality resolution")
 {
     // a single-literal clause is trivially maximal/eligible regardless of what

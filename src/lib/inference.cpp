@@ -6,14 +6,22 @@
 namespace
 {
 
-static int gFreshVarCounter = 0;
-
-static Clause standardizeApart(const Clause &c)
+// Renames c's variables to names not used anywhere in `forbidden` (which must
+// include c's own variables), so the result shares no variable with any clause
+// `forbidden` was built from. Deterministic: depends only on the inputs.
+static Clause standardizeApart(const Clause &c, const std::set<Variable> &forbidden)
 {
-    std::set<Variable> vars = FreeVariables(c);
     Substitution renaming;
-    for (const auto &v : vars)
-        renaming[v] = Variable{"_v" + std::to_string(gFreshVarCounter++)};
+    int next = 0;
+    for (const auto &v : FreeVariables(c))
+    {
+        Variable fresh;
+        do
+        {
+            fresh = Variable{"_v" + std::to_string(next++)};
+        } while (forbidden.count(fresh));
+        renaming[v] = fresh;
+    }
     return applySubstitution(renaming, c);
 }
 
@@ -107,8 +115,10 @@ static void performSuperpositionStep(const Clause &D, const Clause &C, const Lit
 
 std::vector<Clause> superposition(const Clause &D, const Clause &C)
 {
-
-    Clause dRenamed = standardizeApart(D);
+    std::set<Variable> forbidden = FreeVariables(D);
+    for (const auto &v : FreeVariables(C))
+        forbidden.insert(v);
+    Clause dRenamed = standardizeApart(D, forbidden);
 
     // D's literal must be positive, and only negative literals are ever selected, so D
     // is only usable here when nothing in it is selected at all.
